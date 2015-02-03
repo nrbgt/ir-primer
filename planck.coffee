@@ -62,7 +62,7 @@ define [], ->
     d3 = _d3
     # instance-level values...
     # TODO: expose as settable/gettable?
-    TEMPERATURE = temperatures[0]
+    TEMPERATURE = temperatures.slice(-1)[0]
     WAVELENGTH = wavelengths.slice(-1)[0]
 
     color = d3.scale.category20c()
@@ -79,8 +79,6 @@ define [], ->
 
     sliderScale = d3.scale.log()
       .domain d3.extent temperatures
-
-    sliderWidth = 140
 
     plotSeries = (series) ->
       # generate an svg path from a series
@@ -121,8 +119,10 @@ define [], ->
 
       render = ->
         series = makeSeries TEMPERATURE
+        solution = plancksLaw TEMPERATURE, WAVELENGTH
         slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
-        handleLabel.text "#{ TEMPERATURE }°K"
+        handleLabel.text TEMPERATURE
+        handleSolution.text if solution[1] then expwn solution[1] else ""
         plots.selectAll '.interactive'
           .data [series]
           .call plotSeries
@@ -130,11 +130,22 @@ define [], ->
           .select "path"
             .style color: "black"
 
+        wavelengthSolutions = references.map (d) ->
+          series: d
+          solution: plancksLaw d.temperature, WAVELENGTH
+
+        solutionObj = wavelengthSolutions.reduce(
+          (memo, obj, i)->
+            memo[obj.series.temperature] = obj.solution[1]
+            memo
+          {}
+        )
+
+        sliderReferences.selectAll "text.solution"
+          .text (d) -> "#{ expwn solutionObj[d.temperature] }"
+
         solutions.selectAll ".solution"
-          .data ->
-            references.map (d) ->
-              series: d
-              solution: plancksLaw d.temperature, WAVELENGTH
+          .data wavelengthSolutions
           .call (solution) ->
             solution.enter()
               .append "g"
@@ -181,7 +192,7 @@ define [], ->
           HEIGHT - (sliderCircle.r * 4),
           sliderCircle.r * 4
         ]
-        slider.attr transform: "translate(#{ WIDTH - sidebarWidth }, 0)"
+        slider.attr transform: "translate(#{ WIDTH - sidebarWidth + 20 }, 0)"
         sliderReferences.attr transform: (d) ->
           "translate(0, #{ sliderScale d.temperature })"
 
@@ -286,8 +297,16 @@ define [], ->
                 .style fill: temperatureColor
 
               init.append "text"
+                .classed temperature: true
                 .text (d) -> d.temperature
                 .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
+
+              init.append "text"
+                .classed solution: true
+                .attr x: sliderCircle.r * 3, dy: ".35em"
+                .style fill: temperatureColor
+
+
 
           slider.append "g"
             .classed handle: true
@@ -296,11 +315,16 @@ define [], ->
                 slideHandle.append "circle"
                   .attr sliderCircle
                 slideHandle.append "text"
-                  .attr dy: ".35em", x: 48 # TODO: magic number
+                  .classed temperature: true
+                  .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
+                slideHandle.append "text"
+                  .classed solution: true
+                  .attr "text-anchor": "end", dy: ".35em"
 
       sliderReferences = slider.selectAll ".reference"
       slideHandle = slider.select ".handle"
-      handleLabel = slideHandle.select "text"
+      handleLabel = slideHandle.select "text.temperature"
+      handleSolution = slideHandle.select "text.solution"
 
       d3.select window
         .on resize: resize
