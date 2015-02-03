@@ -4,22 +4,15 @@ html(lang="en")
     meta(charset="utf-8")
 
     style: :stylus
-      @import "./bower_components/d3.slider/d3.slider.css"
-
-      axis-font = 11px
-
       body
         overflow hidden
         margin 0
         padding 0
-        font-family "Gill Sans MT", "Gill Sans"
+        font-family "MathJax_Main"
 
       h1
         margin 0
         padding 0
-
-      header
-        padding 20px 80px 20px 80px
 
       .title
         text-align center
@@ -31,19 +24,17 @@ html(lang="en")
           width 190px
           font-family serif
 
-
-      .slider-wrap
-        .slider
-          width 100%
-          margin-top 30px
-
-          .handle-label
-            font-size 14px
+      .slider
+        margin-top 10px
+        circle
+          fill transparent
+        .handle
+          text
+            font-size 24px
             font-weight bold
-            text-align center
-            margin-top -20px
-            margin-left -20px
-            display block
+          circle
+            stroke black
+            stroke-width 2px
 
       svg
         .label
@@ -58,7 +49,7 @@ html(lang="en")
             stroke black
             shape-rendering crispEdges
           text
-            font-size axis-font
+            font-size 16px
             text-anchor middle
 
         .plots
@@ -99,14 +90,13 @@ html(lang="en")
     .plot.planck
 
     script(src="./bower_components/d3/d3.min.js")
-    script(src="./bower_components/d3.slider/d3.slider.js")
     script
       :coffee
         # screen-dependent globals
-        w = h = el_givens = temperature = null
+        w = h = el_references = null
 
         # magic numbers
-        padding = top: 10, left: 80, right: 80, bottom: 80
+        padding = top: 10, left: 120, right: 80, bottom: 90
         xDomain = [0.1, 100]
         yDomain = [1e-4, 1e9]
         axisW = 20
@@ -130,16 +120,15 @@ html(lang="en")
         header = d3.select("header").node()
 
         # data
-        wavelengths = [
-          0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-          1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-          12, 20, 30, 40, 50, 60, 70, 80, 90, 100
-        ]
+        wavelengths = (i for i in [0..0.95] by 0.05)
+           .concat (i for i in [1..19.5] by 0.5)
+           .concat (i for i in [20..100] by 1)
 
         temperatures = [
           100, 200, 400, 600, 800, 1000,
           2000, 3000, 4000, 5000, 6000
         ]
+        temperature = temperatures[0]
 
         # d3 generatory things
         expwn = (d) ->
@@ -151,6 +140,7 @@ html(lang="en")
                   .map (e) -> "⁰¹²³⁴⁵⁶⁷⁸⁹"[+e]
                   .join ""
                 mag + "×10" + sign + exp
+        nthTick = (n) -> (t, i) -> if !(i %% n) then expwn t else ""
 
         makeSeries = (temperature)->
           temperature: temperature
@@ -158,7 +148,8 @@ html(lang="en")
             .map (wavelength)-> plancks_law temperature, wavelength
             .filter (point)-> point[1]
 
-        color = d3.scale.category20c()
+        color = d3.scale.category20b()
+        temperatureColor = (d) -> color d.temperature
 
         seriesPath = d3.svg.line()
           .x (d) -> xScale d[0]
@@ -172,62 +163,91 @@ html(lang="en")
                 .append "g"
                 .classed series: true
                 .append "path"
+                .style stroke: temperatureColor
+
             .selectAll "path"
               .data (d) -> [d.spectral_exitance]
               .attr d: seriesPath
-              .style stroke: color
-
-        givens = temperatures.map makeSeries
+              
+        references = temperatures.map makeSeries
 
         # Slider stuff
-        sliderAxis = d3.svg.axis()
-          .orient "bottom"
-          .ticks 5
-          .tickFormat expwn
+        sliderScale = d3.scale.log()
+          .domain d3.extent temperatures
 
-        slider = d3.slider()
-          .axis sliderAxis
-          .min temperatures[0]
-          .max temperatures.slice(-1)[0]
-          .on "slide", (evt, value) ->
-            handle_label.text "T=#{  expwn(value) }K"
-            temperature = value
+        sliderAxis = d3.svg.axis()
+          .scale sliderScale
+          .orient "top"
+          .tickFormat nthTick 2
+          
+        slider = d3.select ".slider"
+          .append "svg"
+        
+        sliderReferences = slider.selectAll ".reference"
+          .data references
+          .call (init) ->
+            init.enter()
+              .append "g"
+              .append "circle"
+              .attr r: 10, cy: 35
+              .style fill: temperatureColor
+        
+        slide = d3.behavior.drag()
+          .on "drag", (value) ->
+            val = sliderScale.invert d3.event.x
+            temperature = Math.max temperatures[0],
+              Math.min(val, temperatures.slice(-1)[0])
             render()
 
-        el_slider = d3.select ".slider"
-          .call slider
-
-        handle_label = el_slider.select ".d3-slider-handle"
-          .append "span"
-          .classed "handle-label": true
-
-        xScale = d3.scale.log().domain xDomain
-        yScale = d3.scale.log().domain yDomain
+        el_sliderAxis = slider.append "g"
+          .classed axis: true
+          .attr transform: "translate(0, 24)"
+        
+        slideHandle = slider.append "g"
+          .classed handle: true
+          .call slide
+          .call (slideHandle) ->
+            slideHandle.append "circle"
+              .attr r: 10, cy: 35
+        
+        handleLabel = slideHandle.append "text"
+          .attr dy: ".71em", y: 48, "text-anchor": "middle"
+  
+        # scales
+        xScale = d3.scale.log()
+          .domain xDomain
+        yScale = d3.scale.log()
+          .domain yDomain
 
         xAxis = d3.svg.axis()
           .scale xScale
           .orient 'bottom'
-
+          .tickFormat nthTick 5
         yAxis = d3.svg.axis()
           .scale yScale
           .orient 'left'
+          .tickFormat nthTick 10
 
-        svg = d3.select ".plot.planck"
+        plotSvg = d3.select ".plot.planck"
           .append "svg"
 
-        defs = svg.append "defs"
+        plots = plotSvg.append "g"
+          .classed plots: 1
+          .attr "clip-path": "url(#planckPath)"
+
+        defs = plotSvg.append "defs"
 
         clip = defs.append "clipPath"
           .attr id: "planckPath"
           .append "rect"
 
-        el_xAxis = svg.append 'g'
+        el_xAxis = plotSvg.append 'g'
           .classed axis: true
 
-        el_yAxis = svg.append 'g'
+        el_yAxis = plotSvg.append 'g'
           .classed axis: true
           
-        yLabel = svg.append "g"
+        yLabel = plotSvg.append "g"
           .classed label: true, x: true
           .append "text"
           .attr "text-anchor": "middle", dy: ".71em"
@@ -237,26 +257,24 @@ html(lang="en")
 
             yLabel.append "tspan"
               .classed unit: true
-              .text " W/m²-µ"
+              .text " [W/m²-µ]"
 
-        xLabel = svg.append "g"
+        xLabel = plotSvg.append "g"
           .classed label: true, y: true
           .append "text"
-          .attr "text-anchor": "middle", dy: ".71em"
+          .attr "text-anchor": "middle", dy: ".71em", y: -10
           .call (yLabel) ->
             yLabel.append "tspan"
               .text "Wavelength"
 
             yLabel.append "tspan"
               .classed unit: true
-              .text " µ"
-
-        plots = svg.append "g"
-          .classed plots: 1
-          .attr "clip-path": "url(#planckPath)"
+              .text " [µ]"
 
         render = ->
           series = makeSeries temperature
+          slideHandle.attr transform: "translate(#{ sliderScale temperature }, 0)"
+          handleLabel.text "T=#{ expwn temperature }"
           plots.selectAll '.interactive'
             .data [series]
             .call plotSeries
@@ -265,28 +283,42 @@ html(lang="en")
               .style color: "black"
         
         # update screen-relevant stuff
-        init = ->
+        resize = ->
           w = window.innerWidth
-          h = window.innerHeight - header.clientHeight + 20
+          h = window.innerHeight - 80
+          
           xScale.range [padding.left, w - padding.right]
           yScale.range [h - padding.bottom, padding.top]
-          svg.attr width: w, height: h
+          
+          plotSvg.attr width: w, height: h
+          
           clip.attr {
-            width: xScale.range()[1]
-            height: yScale.range()[0]
+            width: xScale.range()[1],
+            height: yScale.range()[0],
+            x: padding.left 
           }
-          el_xAxis.attr transform: "translate(#{[ 0, h - padding.bottom ] })"
+            
+          
+          el_xAxis.attr transform: "translate(0, #{ h - padding.bottom })"
             .call xAxis
-          el_yAxis.attr transform: "translate(#{ [padding.left, 0] })"
+          el_yAxis.attr transform: "translate(#{ padding.left }, 0)"
             .call yAxis
+          
           yLabel.attr transform: "translate(10, #{ h/2 }) rotate(-90)"
           xLabel.attr transform: "translate(#{ [w/2, h - 50] })"
-          el_givens = plots.selectAll '.series'
-            .data givens
+          
+          el_references = plots.selectAll '.series'
+            .data references
             .call plotSeries
-          console.log( el_slider.select "svg > g"
-            .call sliderAxis)
+          
+          sliderScale.range [padding.left, w - padding.right]
+          slider.attr width: w, height: 80
+          el_sliderAxis.call sliderAxis
+          sliderReferences.attr transform: (d) ->
+            "translate(#{ sliderScale d.temperature }, 0)"
+          
           render()
-        init()
+        resize()
 
-        d3.select(window).on resize: init
+        d3.select window
+          .on resize: resize

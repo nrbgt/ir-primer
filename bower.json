@@ -14,7 +14,6 @@
   ],
   "dependencies": {
     "d3": "~3.5.3",
-    "d3.slider": "turban/d3.slider",
     "MathJax": "mathjax/MathJax#~2.5.0"
   }
 }
