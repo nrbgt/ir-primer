@@ -39,14 +39,17 @@ define [], ->
 
   # d3 generatory things
   expwn = (d) ->
-    d.toExponential 1
+    return unless d
+    parseFloat(d).toExponential 1
       .replace /^(.*)e([+-])(\d*)$/,
         (match, mag, sign, exp)->
+          mag = if mag == "1.0" then "" else mag.replace(/\.0$/, "") + "×"
           sign = if sign == "-" then "⁻" else ""
-          exp =  exp.split ""
+
+          exp = exp.split ""
             .map (e) -> "⁰¹²³⁴⁵⁶⁷⁸⁹"[+e]
             .join ""
-          mag + "×10" + sign + exp
+          mag + "10" + sign + exp
 
 
   makeSeries = (temperature)->
@@ -113,7 +116,6 @@ define [], ->
       selection.classed planck: true
 
       explore = ->
-        #console.log WAVELENGTH, xScale(WAVELENGTH),  d3.event.dx, d3.mouse @
         WAVELENGTH = xScale.invert d3.mouse(@)[0]
         render()
 
@@ -123,12 +125,23 @@ define [], ->
         slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
         handleLabel.text TEMPERATURE
         handleSolution.text if solution[1] then expwn solution[1] else ""
-        plots.selectAll '.interactive'
+        plots.selectAll '.series.interactive'
           .data [series]
           .call plotSeries
           .classed interactive: true
           .select "path"
             .style color: "black"
+
+        solutions.selectAll '.solution.interactive'
+          .data [solution.solution]
+          .call (solution) ->
+            solution.enter()
+              .append "g"
+              .classed solution: true, interactive: true
+              .append "circle"
+              .attr r: 3
+          .attr transform: (d) ->
+            "translate(#{xScale solution[0]}, #{yScale solution[1]} )"
 
         wavelengthSolutions = references.map (d) ->
           series: d
@@ -144,12 +157,12 @@ define [], ->
         sliderReferences.selectAll "text.solution"
           .text (d) -> "#{ expwn solutionObj[d.temperature] }"
 
-        solutions.selectAll ".solution"
+        solutions.selectAll ".solution.reference"
           .data wavelengthSolutions
           .call (solution) ->
             solution.enter()
               .append "g"
-              .classed solution: true
+              .classed solution: true, reference: true
               .call (solution) ->
                 solution.append "circle"
                   .attr r: 5
@@ -177,9 +190,12 @@ define [], ->
         el_xAxis.attr transform: "translate(0, #{ HEIGHT - padding.bottom })"
           .call xAxis
           .selectAll "text"
+          .text -> expwn this.textContent
 
         el_yAxis.attr transform: "translate(#{ padding.left }, 0)"
           .call yAxis
+          .selectAll "text"
+          .text -> expwn this.textContent
 
         yLabel.attr transform: "translate(10, #{ HEIGHT/2 }) rotate(-90)"
         xLabel.attr transform: "translate(#{ [WIDTH/2, HEIGHT - 50] })"
@@ -305,8 +321,6 @@ define [], ->
                 .classed solution: true
                 .attr x: sliderCircle.r * 3, dy: ".35em"
                 .style fill: temperatureColor
-
-
 
           slider.append "g"
             .classed handle: true

@@ -1,6 +1,8 @@
 
 .planck
   overflow hidden
+  // use MathJax if you got it
+  font-family MathJax_Main
 
   .slider
     margin-top 10px
@@ -34,14 +36,15 @@
         font-size 16px
         text-anchor middle
 
+    .interactive
+      path, circle
+        stroke black !important
+        stroke-width 4px
+
     .plots
       path
         fill none
         stroke-width 2px
-      .interactive
-        path
-          stroke black !important
-          stroke-width 4px
       .bg
         fill transparent
       .solution
