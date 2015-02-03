@@ -124,13 +124,17 @@ define [], ->
         solution = plancksLaw TEMPERATURE, WAVELENGTH
         slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
         handleLabel.text TEMPERATURE
-        handleSolution.text if solution[1] then expwn solution[1] else ""
+        handleSolution.text if solution[1] then "I: #{expwn solution[1]}" else ""
         plots.selectAll '.series.interactive'
           .data [series]
           .call plotSeries
           .classed interactive: true
           .select "path"
             .style color: "black"
+
+        wavelengthLabel.attr transform: "translate(#{ xScale WAVELENGTH }, 20)"
+          .select "text"
+          .text "λ: #{expwn WAVELENGTH}"
 
         solutions.selectAll '.solution.interactive'
           .data [solution.solution]
@@ -268,6 +272,11 @@ define [], ->
                 .classed unit: true
                 .text " [µ]"
 
+          plotSvg.append "g"
+            .classed wavelength: true, interactive: true
+            .attr "text-anchor": "middle"
+            .append "text"
+
 
       plots = plotSvg.select ".plots"
       solutions = plots.select ".solutions"
@@ -278,6 +287,8 @@ define [], ->
       el_yAxis = plotSvg.select ".axis.y"
       yLabel = plotSvg.select ".label.y text"
       xLabel = plotSvg.select ".label.x text"
+      wavelengthLabel = plotSvg.select ".wavelength.interactive"
+
 
       # slider stuff
       slide = d3.behavior.drag()
