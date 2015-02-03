@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "jade": "./node_modules/.bin/jade --watch planck.jade",
+    "jade": "./node_modules/.bin/jade --watch *.jade --pretty",
+    "stylus": "./node_modules/.bin/stylus -w *.styl --out .",
+    "coffee": "./node_modules/.bin/coffee -w -o . --compile *.coffee",
     "serve": "./node_modules/.bin/live-server",
-    "live": "./bin/npm_watch_multiple.sh jade serve"
+    "live": "./bin/npm_watch_multiple.sh jade stylus coffee serve"
   },
   "author": "",
   "license": "BSD",

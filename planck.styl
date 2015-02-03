@@ -1,0 +1,46 @@
+
+.planck
+  overflow hidden
+
+  .slider
+    margin-top 10px
+
+    circle
+      fill transparent
+
+    .handle
+      text
+        font-size 24px
+        font-weight bold
+      circle
+        stroke black
+        stroke-width 2px
+
+  svg
+    .label
+      font-size 32px
+
+      .unit
+        fill #777
+
+    .axis
+      line, path
+        fill none
+        stroke #999
+        shape-rendering crispEdges
+      text
+        font-size 16px
+        text-anchor middle
+
+    .plots
+      path
+        fill none
+        stroke-width 2px
+      .interactive
+        path
+          stroke black !important
+          stroke-width 4px
+      .bg
+        fill transparent
+      .solution
+        fill none

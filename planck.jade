@@ -4,66 +4,29 @@ html(lang="en")
     meta(charset="utf-8")
 
     style: :stylus
+      @import "./planck.css"
       body
         overflow hidden
         margin 0
         padding 0
         font-family "MathJax_Main"
-
-      h1
-        margin 0
-        padding 0
-
-      .sidebar
-        text-align center
+      
+      .title
         position absolute
+        right 200px
+        width 300px
+        h1
+          margin 0
+          padding 0
+      
+      .my-planck
+        position absolute
+        left 0
         right 0
+        bottom 0
         top 0
-
-        blockquote
-          width 190px
-          font-family serif
-
-      .slider
-        margin-top 10px
-        circle
-          fill transparent
-        .handle
-          text
-            font-size 24px
-            font-weight bold
-          circle
-            stroke black
-            stroke-width 2px
-
-      svg
-        .label
-          font-size 32px
-
-          .unit
-            fill #777
-
-        .axis
-          line, path
-            fill none
-            stroke #999
-            shape-rendering crispEdges
-          text
-            font-size 16px
-            text-anchor middle
-
-        .plots
-          path
-            fill none
-            stroke-width 2px
-          .interactive
-            path
-              stroke black !important
-              stroke-width 4px
-          .bg
-            fill transparent
-          .solution
-            fill none
+        
+        
 
     script(type="text/x-mathjax-config")
       :coffee
@@ -73,294 +36,25 @@ html(lang="en")
     script(
       src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML")
 
-
   body
-    .plot.planck
-    .sidebar
-      .title
-        h1 Planck's Law
-        .equation
-          blockquote
-            :markdown
-              The EM modes exist with only discrete energies that are multiples
-              of _hv_, where _h_ is Planck's constant and _v_ is frequency.
-          span.
-            $$
-            I(\lambda,T) =
-            \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
-            $$
-      .slider-wrap
-        .slider
+    .title
+      h1 Planck's Function
+      .equation
+        blockquote
+          :markdown
+            The EM modes exist with only discrete energies that are multiples
+            of _hv_, where _h_ is Planck's constant and _v_ is frequency.
+        span.
+          $$
+          I(\lambda,T) =
+          \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
+          $$
+    .my-planck
 
-
-    script(src="./bower_components/d3/d3.min.js")
+    script(src="./bower_components/requirejs/require.js")
     script
       :coffee
-        # screen-dependent globals
-        w = h = el_references = null
-
-        # magic numbers
-        padding = top: 10, left: 120, right: 80, bottom: 90
-        xDomain = [0.1, 100]
-        yDomain = [1e-4, 1e9]
-        axisW = 20
-        sliderCircle = r: 18, cx: 22
-        sidebarWidth = 150
-
-        # constants
-        c1_boltzman = 3.74e8
-        c2_boltzman = 1.44e4
-        wien = 2898
-
-        # formulae
-        plancksLaw = (temperature, wavelength)->
-          [
-            wavelength,
-            c1_boltzman / (
-              (wavelength ** 5) * (
-                Math.exp(c2_boltzman / (wavelength * temperature)) - 1
-              )
-            )
-          ]
-
-        header = d3.select("header").node()
-
-        # data
-        wavelengths = (i for i in [0..0.95] by 0.05)
-           .concat (i for i in [1..19.5] by 0.5)
-           .concat (i for i in [20..100] by 1)
-
-        temperatures = [
-          100, 200, 400, 600, 800, 1000,
-          2000, 3000, 4000, 5000, 6000
-        ]
-        TEMPERATURE = temperatures[0]
-        WAVELENGTH = null
-
-        # d3 generatory things
-        expwn = (d) ->
-          d.toExponential 1
-            .replace /^(.*)e([+-])(\d*)$/,
-              (match, mag, sign, exp)->
-                sign = if sign == "-" then "⁻" else ""
-                exp =  exp.split ""
-                  .map (e) -> "⁰¹²³⁴⁵⁶⁷⁸⁹"[+e]
-                  .join ""
-                mag + "×10" + sign + exp
-        nthTick = (n) -> (t, i) -> if !(i %% n) then expwn t else ""
-
-        makeSeries = (temperature)->
-          temperature: temperature
-          spectral_exitance: wavelengths
-            .map (wavelength)-> plancksLaw temperature, wavelength
-            .filter (point)-> point[1]
-
-        color = d3.scale.category20c()
-        temperatureColor = (d) -> color d.temperature
-
-        seriesPath = d3.svg.line()
-          .x (d) -> xScale d[0]
-          .y (d) -> yScale d[1]
-          .interpolate "basis"
-
-        plotSeries = (series) ->
-          series
-            .call (series) ->
-              series.enter()
-                .append "g"
-                .classed series: true
-                .append "path"
-                .style stroke: temperatureColor
-
-            .selectAll "path"
-              .data (d) -> [d.spectral_exitance]
-              .attr d: seriesPath
-        
-        explore = ->
-          WAVELENGTH = xScale.invert d3.event.x
-          render()
-              
-        references = temperatures.map makeSeries
-        
-        # sidebar
-        sidebar = d3.select ".sidebar"
-          .attr width: "#{ sidebarWidth }px"
-
-        # Slider stuff
-        sliderScale = d3.scale.log()
-          .domain d3.extent temperatures
-          
-        slider = d3.select ".slider"
-          .append "svg"
-        
-        title = d3.select ".title"
-          .node()
-        
-        sliderReferences = slider.selectAll ".reference"
-          .data references
-          .call (init) ->
-            init = init.enter()
-              .append "g"
-              .classed reference: true
-            
-            init.append "circle"
-              .attr sliderCircle
-              .style fill: temperatureColor
-            
-            init.append "text"
-              .text (d) -> d.temperature
-              .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
-        
-        slide = d3.behavior.drag()
-          .on "drag", (value) ->
-            val = parseInt sliderScale.invert d3.event.y
-            TEMPERATURE = Math.max temperatures[0],
-              Math.min(val, temperatures.slice(-1)[0])
-            render()
-        
-        slideHandle = slider.append "g"
-          .classed handle: true
-          .call slide
-          .call (slideHandle) ->
-            slideHandle.append "circle"
-              .attr sliderCircle
-        
-        handleLabel = slideHandle.append "text"
-          .attr dy: ".35em", x: 48
-  
-        # scales
-        xScale = d3.scale.log()
-          .domain xDomain
-        yScale = d3.scale.log()
-          .domain yDomain
-
-        xAxis = d3.svg.axis()
-          .scale xScale
-          .orient 'bottom'
-          #.tickFormat nthTick 5
-        yAxis = d3.svg.axis()
-          .scale yScale
-          .orient 'left'
-          #.tickFormat nthTick 10
-
-        plotSvg = d3.select ".plot.planck"
-          .append "svg"
-
-        plots = plotSvg.append "g"
-          .classed plots: true
-          .attr "clip-path": "url(#planckPath)"
-        
-        solutions = plots.append "g"
-          .classed solutions: true
-
-        plotsBg = plots.append "rect"
-          .classed bg: true
-          .on mousemove: explore
-
-        defs = plotSvg.append "defs"
-
-        clip = defs.append "clipPath"
-          .attr id: "planckPath"
-          .append "rect"
-
-        el_xAxis = plotSvg.append 'g'
-          .classed axis: true
-
-        el_yAxis = plotSvg.append 'g'
-          .classed axis: true
-          
-        yLabel = plotSvg.append "g"
-          .classed label: true, x: true
-          .append "text"
-          .attr "text-anchor": "middle", dy: ".71em"
-          .call (yLabel) ->
-            yLabel.append "tspan"
-              .text "Spectral Exitance"
-
-            yLabel.append "tspan"
-              .classed unit: true
-              .text " [W/m²-µ]"
-
-        xLabel = plotSvg.append "g"
-          .classed label: true, y: true
-          .append "text"
-          .attr "text-anchor": "middle", dy: ".71em", y: -10
-          .call (yLabel) ->
-            yLabel.append "tspan"
-              .text "Wavelength"
-
-            yLabel.append "tspan"
-              .classed unit: true
-              .text " [µ]"
-
-        render = ->
-          series = makeSeries TEMPERATURE
-          slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
-          handleLabel.text "#{ TEMPERATURE }°K"
-          plots.selectAll '.interactive'
-            .data [series]
-            .call plotSeries
-            .classed interactive: true
-            .select "path"
-              .style color: "black"
-          
-          solutions.selectAll ".solution"
-            .data ->
-              references.map (d) ->
-                series: d
-                solution: plancksLaw d.temperature, WAVELENGTH
-            .call (solution) ->
-              solution.enter()
-                .append "g"
-                .classed solution: true
-                .call (solution) ->
-                  solution.append "circle"
-                    .attr r: 5
-                    .style stroke: (d) -> temperatureColor d.series
-            .attr transform: (d) ->
-              "translate(#{xScale d.solution[0]}, #{yScale d.solution[1]} )"
-        
-        # update screen-relevant stuff
-        resize = ->
-          w = window.innerWidth - sidebarWidth
-          h = window.innerHeight
-          
-          xScale.range [padding.left, w - padding.right]
-          yScale.range [h - padding.bottom, padding.top]
-          
-          plotSvg.attr width: w, height: h
-          
-          plotsBg.attr width: w - padding.right, height: h
-          clip.attr {
-            width: xScale.range()[1],
-            height: yScale.range()[0],
-            x: padding.left 
-          }
-          
-          el_xAxis.attr transform: "translate(0, #{ h - padding.bottom })"
-            .call xAxis
-            .selectAll "text"
-              
-          el_yAxis.attr transform: "translate(#{ padding.left }, 0)"
-            .call yAxis
-          
-          yLabel.attr transform: "translate(10, #{ h/2 }) rotate(-90)"
-          xLabel.attr transform: "translate(#{ [w/2, h - 50] })"
-          
-          el_references = plots.selectAll '.series'
-            .data references
-            .call plotSeries
-          
-          sliderScale.range [
-            h - (title.clientHeight + sliderCircle.r * 3),
-            sliderCircle.r * 2
-          ]
-          slider.attr width: sidebarWidth, height: h
-          sliderReferences.attr transform: (d) ->
-            "translate(0, #{ sliderScale d.temperature })"
-          
-          render()
-        resize()
-
-        d3.select window
-          .on resize: resize
+        require ["./bower_components/d3/d3.js", "./planck.js"], (d3, Planck) ->
+          planck = Planck(d3)
+          plot = d3.select ".my-planck"
+            .call planck
