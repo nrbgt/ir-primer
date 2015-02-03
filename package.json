@@ -1,0 +1,18 @@
+{
+  "name": "planck",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/jade --watch planck.jade"
+  },
+  "author": "",
+  "license": "BSD",
+  "devDependencies": {
+    "coffee-script": "~1.9.0",
+    "stylus": "~0.49.3",
+    "jade": "~1.9.1",
+    "marked": "~0.3.3"
+  }
+}
