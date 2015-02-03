@@ -330,7 +330,7 @@ define [], ->
 
               init.append "text"
                 .classed solution: true
-                .attr x: sliderCircle.r * 3, dy: ".35em"
+                .attr x: sliderCircle.r * 2.5, dy: ".35em"
                 .style fill: temperatureColor
 
           slider.append "g"
@@ -344,7 +344,7 @@ define [], ->
                   .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
                 slideHandle.append "text"
                   .classed solution: true
-                  .attr "text-anchor": "end", dy: ".35em"
+                  .attr "text-anchor": "end", dy: ".35em", dx: -5
 
       sliderReferences = slider.selectAll ".reference"
       slideHandle = slider.select ".handle"
