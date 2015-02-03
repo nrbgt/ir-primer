@@ -14,11 +14,11 @@ html(lang="en")
         margin 0
         padding 0
 
-      .title
+      .sidebar
         text-align center
         position absolute
-        right 50px
-        top 120px
+        right 0
+        top 0
 
         blockquote
           width 190px
@@ -46,7 +46,7 @@ html(lang="en")
         .axis
           line, path
             fill none
-            stroke black
+            stroke #999
             shape-rendering crispEdges
           text
             font-size 16px
@@ -60,6 +60,10 @@ html(lang="en")
             path
               stroke black !important
               stroke-width 4px
+          .bg
+            fill transparent
+          .solution
+            fill none
 
     script(type="text/x-mathjax-config")
       :coffee
@@ -71,23 +75,23 @@ html(lang="en")
 
 
   body
-    header
+    .plot.planck
+    .sidebar
+      .title
+        h1 Planck's Law
+        .equation
+          blockquote
+            :markdown
+              The EM modes exist with only discrete energies that are multiples
+              of _hv_, where _h_ is Planck's constant and _v_ is frequency.
+          span.
+            $$
+            I(\lambda,T) =
+            \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
+            $$
       .slider-wrap
         .slider
-    .title
-      h1 Planck's Law
-      .equation
-        blockquote
-          :markdown
-            The EM modes exist with only discrete energies that are multiples
-            of _hv_, where _h_ is Planck's constant and _v_ is frequency.
-        span.
-          $$
-          I(\lambda,T) =
-          \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
-          $$
 
-    .plot.planck
 
     script(src="./bower_components/d3/d3.min.js")
     script
@@ -100,6 +104,8 @@ html(lang="en")
         xDomain = [0.1, 100]
         yDomain = [1e-4, 1e9]
         axisW = 20
+        sliderCircle = r: 18, cx: 22
+        sidebarWidth = 150
 
         # constants
         c1_boltzman = 3.74e8
@@ -107,7 +113,7 @@ html(lang="en")
         wien = 2898
 
         # formulae
-        plancks_law = (temperature, wavelength)->
+        plancksLaw = (temperature, wavelength)->
           [
             wavelength,
             c1_boltzman / (
@@ -128,7 +134,8 @@ html(lang="en")
           100, 200, 400, 600, 800, 1000,
           2000, 3000, 4000, 5000, 6000
         ]
-        temperature = temperatures[0]
+        TEMPERATURE = temperatures[0]
+        WAVELENGTH = null
 
         # d3 generatory things
         expwn = (d) ->
@@ -145,10 +152,10 @@ html(lang="en")
         makeSeries = (temperature)->
           temperature: temperature
           spectral_exitance: wavelengths
-            .map (wavelength)-> plancks_law temperature, wavelength
+            .map (wavelength)-> plancksLaw temperature, wavelength
             .filter (point)-> point[1]
 
-        color = d3.scale.category20b()
+        color = d3.scale.category20c()
         temperatureColor = (d) -> color d.temperature
 
         seriesPath = d3.svg.line()
@@ -168,50 +175,58 @@ html(lang="en")
             .selectAll "path"
               .data (d) -> [d.spectral_exitance]
               .attr d: seriesPath
+        
+        explore = ->
+          WAVELENGTH = xScale.invert d3.event.x
+          render()
               
         references = temperatures.map makeSeries
+        
+        # sidebar
+        sidebar = d3.select ".sidebar"
+          .attr width: "#{ sidebarWidth }px"
 
         # Slider stuff
         sliderScale = d3.scale.log()
           .domain d3.extent temperatures
-
-        sliderAxis = d3.svg.axis()
-          .scale sliderScale
-          .orient "top"
-          .tickFormat nthTick 2
           
         slider = d3.select ".slider"
           .append "svg"
         
+        title = d3.select ".title"
+          .node()
+        
         sliderReferences = slider.selectAll ".reference"
           .data references
           .call (init) ->
-            init.enter()
+            init = init.enter()
               .append "g"
-              .append "circle"
-              .attr r: 10, cy: 35
+              .classed reference: true
+            
+            init.append "circle"
+              .attr sliderCircle
               .style fill: temperatureColor
+            
+            init.append "text"
+              .text (d) -> d.temperature
+              .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
         
         slide = d3.behavior.drag()
           .on "drag", (value) ->
-            val = sliderScale.invert d3.event.x
-            temperature = Math.max temperatures[0],
+            val = parseInt sliderScale.invert d3.event.y
+            TEMPERATURE = Math.max temperatures[0],
               Math.min(val, temperatures.slice(-1)[0])
             render()
-
-        el_sliderAxis = slider.append "g"
-          .classed axis: true
-          .attr transform: "translate(0, 24)"
         
         slideHandle = slider.append "g"
           .classed handle: true
           .call slide
           .call (slideHandle) ->
             slideHandle.append "circle"
-              .attr r: 10, cy: 35
+              .attr sliderCircle
         
         handleLabel = slideHandle.append "text"
-          .attr dy: ".71em", y: 48, "text-anchor": "middle"
+          .attr dy: ".35em", x: 48
   
         # scales
         xScale = d3.scale.log()
@@ -222,18 +237,25 @@ html(lang="en")
         xAxis = d3.svg.axis()
           .scale xScale
           .orient 'bottom'
-          .tickFormat nthTick 5
+          #.tickFormat nthTick 5
         yAxis = d3.svg.axis()
           .scale yScale
           .orient 'left'
-          .tickFormat nthTick 10
+          #.tickFormat nthTick 10
 
         plotSvg = d3.select ".plot.planck"
           .append "svg"
 
         plots = plotSvg.append "g"
-          .classed plots: 1
+          .classed plots: true
           .attr "clip-path": "url(#planckPath)"
+        
+        solutions = plots.append "g"
+          .classed solutions: true
+
+        plotsBg = plots.append "rect"
+          .classed bg: true
+          .on mousemove: explore
 
         defs = plotSvg.append "defs"
 
@@ -272,35 +294,53 @@ html(lang="en")
               .text " [µ]"
 
         render = ->
-          series = makeSeries temperature
-          slideHandle.attr transform: "translate(#{ sliderScale temperature }, 0)"
-          handleLabel.text "T=#{ expwn temperature }"
+          series = makeSeries TEMPERATURE
+          slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
+          handleLabel.text "#{ TEMPERATURE }°K"
           plots.selectAll '.interactive'
             .data [series]
             .call plotSeries
             .classed interactive: true
             .select "path"
               .style color: "black"
+          
+          solutions.selectAll ".solution"
+            .data ->
+              references.map (d) ->
+                series: d
+                solution: plancksLaw d.temperature, WAVELENGTH
+            .call (solution) ->
+              solution.enter()
+                .append "g"
+                .classed solution: true
+                .call (solution) ->
+                  solution.append "circle"
+                    .attr r: 5
+                    .style stroke: (d) -> temperatureColor d.series
+            .attr transform: (d) ->
+              "translate(#{xScale d.solution[0]}, #{yScale d.solution[1]} )"
         
         # update screen-relevant stuff
         resize = ->
-          w = window.innerWidth
-          h = window.innerHeight - 80
+          w = window.innerWidth - sidebarWidth
+          h = window.innerHeight
           
           xScale.range [padding.left, w - padding.right]
           yScale.range [h - padding.bottom, padding.top]
           
           plotSvg.attr width: w, height: h
           
+          plotsBg.attr width: w - padding.right, height: h
           clip.attr {
             width: xScale.range()[1],
             height: yScale.range()[0],
             x: padding.left 
           }
-            
           
           el_xAxis.attr transform: "translate(0, #{ h - padding.bottom })"
             .call xAxis
+            .selectAll "text"
+              
           el_yAxis.attr transform: "translate(#{ padding.left }, 0)"
             .call yAxis
           
@@ -311,11 +351,13 @@ html(lang="en")
             .data references
             .call plotSeries
           
-          sliderScale.range [padding.left, w - padding.right]
-          slider.attr width: w, height: 80
-          el_sliderAxis.call sliderAxis
+          sliderScale.range [
+            h - (title.clientHeight + sliderCircle.r * 3),
+            sliderCircle.r * 2
+          ]
+          slider.attr width: sidebarWidth, height: h
           sliderReferences.attr transform: (d) ->
-            "translate(#{ sliderScale d.temperature }, 0)"
+            "translate(0, #{ sliderScale d.temperature })"
           
           render()
         resize()

@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/jade --watch planck.jade"
+    "jade": "./node_modules/.bin/jade --watch planck.jade",
+    "serve": "./node_modules/.bin/live-server",
+    "live": "./bin/npm_watch_multiple.sh jade serve"
   },
   "author": "",
   "license": "BSD",
@@ -14,6 +16,7 @@
     "stylus": "~0.49.3",
     "jade": "~1.9.1",
     "marked": "~0.3.3",
-    "nib": "~1.1.0"
+    "nib": "~1.1.0",
+    "live-server": "~0.6.3"
   }
 }
