@@ -15,6 +15,9 @@
   "dependencies": {
     "d3": "~3.5.3",
     "MathJax": "mathjax/MathJax#~2.5.0",
-    "requirejs": "~2.1.15"
+    "requirejs": "~2.1.15",
+    "reveal.js": "<3.0.0",
+    "Font-Awesome": "~4.3.0",
+    "jquery": "~2.1.3"
   }
 }
