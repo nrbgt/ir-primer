@@ -187,7 +187,7 @@ define [], ->
             "translate(#{xScale d.solution[0]}, #{yScale d.solution[1]} )"
 
       # update screen-relevant stuff
-      resize = ->
+      resize = api.resize = ->
         WIDTH = selection.node().clientWidth
         HEIGHT = selection.node().clientHeight
 
@@ -387,7 +387,7 @@ define [], ->
       handleSolution = slideHandle.select "text.solution"
 
       d3.select window
-        .on resize: resize
+        .on "resize.planck": resize
 
       resize()
 

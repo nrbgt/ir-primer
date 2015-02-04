@@ -1,5 +1,4 @@
-bower_components
-node_modules
-\.ipynb_checkpoints
-__pycache__
-
+node_modules/
+\.ipynb_checkpoints/
+__pycache__/
+dist/

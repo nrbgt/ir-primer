@@ -1,10 +1,10 @@
 {
-  "name": "planck",
+  "name": "ir-primer",
   "version": "0.0.0",
   "authors": [
-    "Nicholas Bollweg <nick.bollweg@gmail.com>"
+    "Nicholas Bollweg <nicholas.bollweg@gtri.gatech.edu>"
   ],
-  "license": "MIT",
+  "license": "BSD",
   "ignore": [
     "**/.*",
     "node_modules",
