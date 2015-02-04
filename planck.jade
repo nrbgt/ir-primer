@@ -13,12 +13,19 @@ html(lang="en")
       
       .title
         position absolute
-        right 250px
-        width 300px
+        left 20px
+        width 45%
+
+        &.wien
+          left inherit
+          right 20px
+          h1
+            color #900
+
+
         h1
           margin 0
           padding 0
-          font-size 2.8em
           text-align center
         blockquote
           margin 0
@@ -26,13 +33,14 @@ html(lang="en")
           text-align justify
         .equation
           font-size 150%
+          
       
       .my-planck
         position absolute
         left 0
         right 0
         bottom 0
-        top 0
+        top 250
         
         
 
@@ -45,6 +53,14 @@ html(lang="en")
       src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML")
 
   body
+
+    .title.wien
+      h1 Wien's Law
+      blockquote
+        :markdown
+          It can be shown that the wavelength maximum for any temperature is
+      .equation.
+        $${\lambda{max}}{\cdot}{T}=2898{\mu}m-K$$
     .title
       h1 Planck's Law
       blockquote
@@ -56,6 +72,7 @@ html(lang="en")
         I(\lambda,T) =
         \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
         $$
+          
     .my-planck
 
     script(src="./bower_components/requirejs/require.js")

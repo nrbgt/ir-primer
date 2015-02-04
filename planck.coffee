@@ -4,7 +4,7 @@ define [], ->
   # constants
   c1_boltzman = 3.74e8
   c2_boltzman = 1.44e4
-  wien = 2898
+  c_wien = 2898
 
 
   # formulae
@@ -17,6 +17,9 @@ define [], ->
         )
       )
     ]
+
+  wiensLaw = (temperature) ->
+    plancksLaw temperature, (c_wien / temperature)
 
   # magic numbers
   padding = top: 40, left: 120, right: 80, bottom: 90
@@ -35,6 +38,9 @@ define [], ->
     100, 200, 400, 600, 800, 1000,
     2000, 3000, 4000, 5000, 6000
   ]
+
+  wiens = temperatures.map (temperature) -> wiensLaw temperature
+
 
 
   # d3 generatory things
@@ -67,6 +73,7 @@ define [], ->
     # TODO: expose as settable/gettable?
     TEMPERATURE = temperatures.slice(-1)[0]
     WAVELENGTH = wavelengths.slice(-1)[0]
+    HOVERWIEN = false
 
     color = d3.scale.category20c()
     temperatureColor = (d) -> color d.temperature
@@ -121,7 +128,10 @@ define [], ->
 
       render = ->
         series = makeSeries TEMPERATURE
-        solution = plancksLaw TEMPERATURE, WAVELENGTH
+        solution = if HOVERWIEN
+            wiensLaw TEMPERATURE
+          else
+            plancksLaw TEMPERATURE, WAVELENGTH
         slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
         handleLabel.text TEMPERATURE
         handleSolution.text if solution[1] then "I: #{expwn solution[1]}" else ""
@@ -149,7 +159,10 @@ define [], ->
 
         wavelengthSolutions = references.map (d) ->
           series: d
-          solution: plancksLaw d.temperature, WAVELENGTH
+          solution: if HOVERWIEN
+              wiensLaw d.temperature
+            else
+              plancksLaw d.temperature, WAVELENGTH
 
         solutionObj = wavelengthSolutions.reduce(
           (memo, obj, i)->
@@ -216,6 +229,10 @@ define [], ->
         sliderReferences.attr transform: (d) ->
           "translate(0, #{ sliderScale d.temperature })"
 
+        wienSeries.selectAll "path"
+          .data [wiens]
+          .attr d: seriesPath
+
         render()
 
       plotSvg = selection.selectAll ".plot.planck"
@@ -241,6 +258,18 @@ define [], ->
 
               plots.append "g"
                 .classed solutions: true
+
+              plots.append "g"
+                .classed wien: true
+                .on {
+                  mouseover: ->
+                    HOVERWIEN = true
+                    render()
+                  mouseout: ->
+                    HOVERWIEN = false
+                    render()
+                }
+                .append "path"
 
           plotSvg.append "g"
             .classed axis: true, x: true
@@ -278,6 +307,7 @@ define [], ->
             .append "text"
 
 
+
       plots = plotSvg.select ".plots"
       solutions = plots.select ".solutions"
       plotsBg = plots.select ".bg"
@@ -288,6 +318,7 @@ define [], ->
       yLabel = plotSvg.select ".label.y text"
       xLabel = plotSvg.select ".label.x text"
       wavelengthLabel = plotSvg.select ".wavelength.interactive"
+      wienSeries = plots.select ".wien"
 
 
       # slider stuff
@@ -306,10 +337,14 @@ define [], ->
             .classed slider: true
 
           slider.append "text"
-            .classed variable: true
+            .classed label: true
             .attr y: sliderCircle.r * 2, x: sliderCircle.r * .5
-            .text "T"
-            .style "font-style": "italic", "font-size": 32
+            .call (sliderLabel) ->
+              sliderLabel.append "tspan"
+                .text "T"
+              sliderLabel.append "tspan"
+                .text "[°K]"
+                .classed unit: true
 
 
           slider.selectAll ".reference"
