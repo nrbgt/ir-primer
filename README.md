@@ -10,9 +10,9 @@ bower install
 ```
 
 Source files are written in whitespace-picky preprocessed languages, and are configured to run continuously, watching for changes in `src/` and output to `dist/`:
-- `npm run jade` for HTML from [Jade](http://jadelang.org)
-- `npm run stylus` for CSS from [Stylus](http://stylus.org)
-- `npm run coffee` for Javascript from [Coffeescript](http:/coffeescript)
+- `npm run jade` for HTML from [Jade](http://jade-lang.com)
+- `npm run stylus` for CSS from [Stylus](http://learnboost.github.io/stylus/)
+- `npm run coffee` for Javascript from [Coffeescript](http://coffeescript.org)
 
 For your hacking convenience, all of these are wrapped together with a live-updating server:
 
@@ -22,11 +22,18 @@ npm run live
 
 This will generate an `.html` file for each of the explanations, which has all self-contained dependencies.
 
-## IPython Notebook integration
-A light wrapper around the javascript allows all the explanation to be embedded inside an IPython Notebook. A few small added files allow for building a standalone [Reveal.js](http://revealjs.org) slideshow.
+## IPython/Jupyter Notebook integration
+A small python wrapper around the built javascript/css allows all the explanations to be embedded inside an [IPython Notebook](http://ipython.org/notebook.html), generally one per cell. Additionally provided is a function for generating a self-contained [Reveal.js](http://lab.hakim.se/reveal-js/) slideshow.
 
 ```python
-import irprimer
-irprimer.planck()
+from irprimer import planck, slides
+planck()
+slides()
 irprimer.slides()
 ```
+
+## Contributing
+Issues and pull requests welcome, especially for improvement of the science and teach-ability of the content!
+
+## License
+IR Primer is published under the [BSD 3-clause](./README.md) license. Bower dependencies are licensed respectively.
