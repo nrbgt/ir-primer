@@ -1,0 +1,53 @@
+.planck {
+  overflow: hidden;
+  font-family: MathJax_Main;
+}
+.planck .slider {
+  margin-top: 10px;
+}
+.planck .slider .handle text {
+  font-weight: bold;
+}
+.planck .slider .handle text.temperature {
+  fill: #fff;
+}
+.planck .slider .handle circle {
+  fill: #000;
+  stroke: #000;
+  stroke-width: 2px;
+}
+.planck svg .label {
+  font-size: 32px;
+}
+.planck svg .label .unit {
+  fill: #777;
+}
+.planck svg .axis line,
+.planck svg .axis path {
+  fill: none;
+  stroke: #999;
+  shape-rendering: crispEdges;
+}
+.planck svg .axis text {
+  font-size: 16px;
+  text-anchor: middle;
+}
+.planck svg .interactive path,
+.planck svg .interactive circle {
+  stroke: #000 !important;
+  stroke-width: 4px;
+}
+.planck svg .plots path {
+  fill: none;
+  stroke-width: 2px;
+}
+.planck svg .plots .bg {
+  fill: transparent;
+}
+.planck svg .plots .solution {
+  fill: none;
+}
+.planck svg .plots .wien path {
+  stroke-width: 6px !important;
+  stroke: #900;
+}
