@@ -1,4 +1,6 @@
+import os
 from random import random
+import time
 
 from subprocess import Popen
 from IPython.display import Javascript, HTML
@@ -20,6 +22,8 @@ def slides(infile="An IR Primer.ipynb",
            outfile="An IR Primer.slides.local.html"):
     Javascript("IPython.notebook.save_notebook()")
 
+    time.sleep(1)
+
     Popen([
         "ipython", "nbconvert",
         infile,
@@ -27,12 +31,15 @@ def slides(infile="An IR Primer.ipynb",
         "--reveal-prefix=./bower_components/reveal.js"
     ])
 
+    time.sleep(1)
+
     with open(tmpfile, "r") as f:
         html = f.read()
 
     for remote, local in replacements.items():
         html = html.replace(remote, local)
 
+    os.unlink(outfile)
     with open(outfile, "w+") as f:
         f.write(html)
 
