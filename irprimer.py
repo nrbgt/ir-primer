@@ -20,7 +20,12 @@ replacements = {
 def slides(infile="An IR Primer.ipynb",
            tmpfile="An IR Primer.slides.html",
            outfile="An IR Primer.slides.local.html"):
-    Javascript("IPython.notebook.save_notebook()")
+    Javascript("""
+        Reveal.addEventListener( 'slidechanged', function( event ) {
+            window.resize()
+        });
+        IPython.notebook.save_notebook()
+    """)
 
     time.sleep(1)
 

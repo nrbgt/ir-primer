@@ -70,12 +70,11 @@ define [], ->
   Planck = (_d3) ->
     d3 = _d3
     # instance-level values...
-    # TODO: expose as settable/gettable?
     TEMPERATURE = temperatures.slice(-1)[0]
     WAVELENGTH = wavelengths.slice(-1)[0]
     HOVERWIEN = false
 
-    color = d3.scale.category20c()
+    color = d3.scale.category20b()
     temperatureColor = (d) -> color d.temperature
 
     # data
@@ -85,7 +84,7 @@ define [], ->
     seriesPath = d3.svg.line()
       .x (d) -> xScale d[0]
       .y (d) -> yScale d[1]
-      .interpolate "basis"
+      #.interpolate "linea"
 
     sliderScale = d3.scale.log()
       .domain d3.extent temperatures
@@ -144,7 +143,7 @@ define [], ->
 
         wavelengthLabel.attr transform: "translate(#{ xScale WAVELENGTH }, 20)"
           .select "text"
-          .text "λ: #{expwn WAVELENGTH}"
+          .text "λ: #{ WAVELENGTH.toFixed(2) }"
 
         solutions.selectAll '.solution.interactive'
           .data [solution.solution]
@@ -207,7 +206,8 @@ define [], ->
         el_xAxis.attr transform: "translate(0, #{ HEIGHT - padding.bottom })"
           .call xAxis
           .selectAll "text"
-          .text -> expwn this.textContent
+          .text ->
+            parseFloat this.textContent unless not this.textContent
 
         el_yAxis.attr transform: "translate(#{ padding.left }, 0)"
           .call yAxis
@@ -287,7 +287,7 @@ define [], ->
 
               yLabel.append "tspan"
                 .classed unit: true
-                .text " [W/m²-µ]"
+                .text " [W/m²-µm]"
 
           plotSvg.append "g"
             .classed label: true, x: true
@@ -299,7 +299,7 @@ define [], ->
 
               yLabel.append "tspan"
                 .classed unit: true
-                .text " [µ]"
+                .text " [µm]"
 
           plotSvg.append "g"
             .classed wavelength: true, interactive: true
