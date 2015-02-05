@@ -57,6 +57,7 @@ define ["./explanation.js"], (Exp)->
 
   Planck = (_d3) ->
     d3 = _d3
+
     # instance-level values...
     TEMPERATURE = temperatures.slice(-1)[0]
     WAVELENGTH = wavelengths.slice(-1)[0]
@@ -70,11 +71,9 @@ define ["./explanation.js"], (Exp)->
 
     # d3 functions
     seriesPath = d3.svg.line()
-      .x (d) -> xScale d[0]
-      .y (d) -> yScale d[1]
+      .x (d) -> scales.x d[0]
+      .y (d) -> scales.y d[1]
 
-    sliderScale = d3.scale.log()
-      .domain d3.extent temperatures
 
     plotSeries = (series) ->
       # generate an svg path from a series
@@ -91,16 +90,19 @@ define ["./explanation.js"], (Exp)->
           .attr d: seriesPath
 
     # scales
-    xScale = d3.scale.log()
+    scales = {}
+    scales.x = d3.scale.log()
       .domain xDomain
-    yScale = d3.scale.log()
+    scales.y = d3.scale.log()
       .domain yDomain
+    scales.slider = d3.scale.log()
+      .domain d3.extent temperatures
 
     xAxis = d3.svg.axis()
-      .scale xScale
+      .scale scales.x
       .orient 'bottom'
     yAxis = d3.svg.axis()
-      .scale yScale
+      .scale scales.y
       .orient 'left'
 
 
@@ -110,13 +112,21 @@ define ["./explanation.js"], (Exp)->
 
       explore = ->
         [mouseX, mouseY] = d3.mouse @
-        WAVELENGTH = xScale.invert mouseX
+        WAVELENGTH = scales.x.invert mouseX
 
-        val = parseInt sliderScale.invert mouseY
+        val = parseInt scales.slider.invert mouseY
         TEMPERATURE = Math.max temperatures[0],
           Math.min(val, temperatures.slice(-1)[0])
 
         api.update()
+
+      # slider stuff
+      slide = d3.behavior.drag()
+        .on "drag", (value) ->
+          val = parseInt scales.slider.invert d3.event.y
+          TEMPERATURE = Math.max temperatures[0],
+            Math.min(val, temperatures.slice(-1)[0])
+          api.update()
 
       api.update = ->
         series = makeSeries TEMPERATURE
@@ -125,7 +135,7 @@ define ["./explanation.js"], (Exp)->
           else
             plancksLaw TEMPERATURE, WAVELENGTH
 
-        slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
+        slideHandle.attr transform: "translate(0, #{ scales.slider TEMPERATURE })"
         handleLabel.text TEMPERATURE
         handleSolution.text if solution[1] then "I: #{expwn solution[1]}" else ""
         plots.selectAll '.series.interactive'
@@ -135,7 +145,7 @@ define ["./explanation.js"], (Exp)->
           .select "path"
             .style color: "black"
 
-        wavelengthLabel.attr transform: "translate(#{ xScale WAVELENGTH }, 20)"
+        wavelengthLabel.attr transform: "translate(#{ scales.x WAVELENGTH }, 20)"
           .select "text"
           .text "λ: #{ WAVELENGTH.toFixed(2) }"
 
@@ -148,7 +158,7 @@ define ["./explanation.js"], (Exp)->
               .append "circle"
               .attr r: 3
           .attr transform: (d) ->
-            "translate(#{xScale solution[0]}, #{yScale solution[1]} )"
+            "translate(#{scales.x solution[0]}, #{scales.y solution[1]} )"
 
         wavelengthSolutions = references.map (d) ->
           series: d
@@ -178,7 +188,7 @@ define ["./explanation.js"], (Exp)->
                   .attr r: 5
                   .style stroke: (d) -> temperatureColor d.series
           .attr transform: (d) ->
-            "translate(#{xScale d.solution[0]}, #{yScale d.solution[1]} )"
+            "translate(#{scales.x d.solution[0]}, #{scales.y d.solution[1]} )"
 
         # for chaining
         api
@@ -188,15 +198,15 @@ define ["./explanation.js"], (Exp)->
         WIDTH = selection.node().clientWidth
         HEIGHT = selection.node().clientHeight
 
-        xScale.range [padding.left, WIDTH - padding.right - sidebarWidth]
-        yScale.range [HEIGHT - padding.bottom, padding.top]
+        scales.x.range [padding.left, WIDTH - padding.right - sidebarWidth]
+        scales.y.range [HEIGHT - padding.bottom, padding.top]
 
         svg.attr width: WIDTH, height: HEIGHT
 
         plotsBg.attr width: WIDTH - padding.right - sidebarWidth, height: HEIGHT
         clip.attr
-          width: xScale.range().slice(-1),
-          height: yScale.range()[0],
+          width: scales.x.range().slice(-1),
+          height: scales.y.range()[0],
           x: padding.left
 
         el_xAxis.attr transform: "translate(0, #{ HEIGHT - padding.bottom })"
@@ -217,14 +227,14 @@ define ["./explanation.js"], (Exp)->
           .data references
           .call plotSeries
 
-        sliderScale.range [
+        scales.slider.range [
           HEIGHT - sliderPadding.bottom
           sliderPadding.top
         ]
-        slider.attr transform: "translate(#{ xScale.range()[1] + 20 }, 0)"
+        slider.attr transform: "translate(#{ scales.x.range()[1] + 20 }, 0)"
         sliderLabel.attr transform: "translate(#{ sidebarWidth }, #{ HEIGHT/2 }) rotate(90)"
         sliderReferences.attr transform: (d) ->
-          "translate(0, #{ sliderScale d.temperature })"
+          "translate(0, #{ scales.slider d.temperature })"
 
         wienSeries.selectAll "path"
           .data [wiens]
@@ -324,14 +334,6 @@ define ["./explanation.js"], (Exp)->
       wavelengthLabel = svg.select ".wavelength.interactive"
       wienSeries = plots.select ".wien"
 
-
-      # slider stuff
-      slide = d3.behavior.drag()
-        .on "drag", (value) ->
-          val = parseInt sliderScale.invert d3.event.y
-          TEMPERATURE = Math.max temperatures[0],
-            Math.min(val, temperatures.slice(-1)[0])
-          api.update()
 
       slider = svg.selectAll ".slider"
         .data [1]
