@@ -191,7 +191,7 @@ define ["./explanation.js"], (Exp)->
         xScale.range [padding.left, WIDTH - padding.right - sidebarWidth]
         yScale.range [HEIGHT - padding.bottom, padding.top]
 
-        plotSvg.attr width: WIDTH, height: HEIGHT
+        svg.attr width: WIDTH, height: HEIGHT
 
         plotsBg.attr width: WIDTH - padding.right - sidebarWidth, height: HEIGHT
         clip.attr
@@ -232,20 +232,20 @@ define ["./explanation.js"], (Exp)->
 
         api.update()
 
-      plotSvg = selection.selectAll ".plot.planck"
+      svg = selection.selectAll ".plot.planck"
         .data [1]
-        .call (plotSvg) ->
-          plotSvg = plotSvg.enter()
+        .call (svg) ->
+          svg = svg.enter()
             .append "svg"
             .classed plot: true
 
-          plotSvg.append "defs"
+          svg.append "defs"
             .append "clipPath"
               .classed "planck-path": true
               .attr id: "planckPath"
               .append "rect"
 
-          plotSvg.append "g"
+          svg.append "g"
             .classed plots: true
             .attr "clip-path": "url(#planckPath)"
             .call (plots) ->
@@ -267,13 +267,13 @@ define ["./explanation.js"], (Exp)->
                     api.update()
                 .append "path"
 
-          plotSvg.append "g"
+          svg.append "g"
             .classed axis: true, x: true
 
-          plotSvg.append "g"
+          svg.append "g"
             .classed axis: true, y: true
 
-          plotSvg.append "g"
+          svg.append "g"
             .classed label: true, y: true
             .append "text"
             .attr "text-anchor": "middle", dy: ".71em"
@@ -289,7 +289,7 @@ define ["./explanation.js"], (Exp)->
                 .classed variable: true
                 .text " I(λ,T)"
 
-          plotSvg.append "g"
+          svg.append "g"
             .classed label: true, x: true
             .append "text"
             .attr "text-anchor": "middle", dy: ".71em", y: -10
@@ -306,23 +306,22 @@ define ["./explanation.js"], (Exp)->
                 .text " λ"
 
 
-          plotSvg.append "g"
+          svg.append "g"
             .classed wavelength: true, interactive: true
             .attr "text-anchor": "middle"
             .append "text"
 
-
-
-      plots = plotSvg.select ".plots"
+      # harvest selectors just initialized
+      plots = svg.select ".plots"
       solutions = plots.select ".solutions"
       plotsBg = plots.select ".bg"
-      defs = plotSvg.select "defs"
+      defs = svg.select "defs"
       clip = defs.select ".planck-path rect"
-      el_xAxis = plotSvg.select ".axis.x"
-      el_yAxis = plotSvg.select ".axis.y"
-      yLabel = plotSvg.select ".label.y text"
-      xLabel = plotSvg.select ".label.x text"
-      wavelengthLabel = plotSvg.select ".wavelength.interactive"
+      el_xAxis = svg.select ".axis.x"
+      el_yAxis = svg.select ".axis.y"
+      yLabel = svg.select ".label.y text"
+      xLabel = svg.select ".label.x text"
+      wavelengthLabel = svg.select ".wavelength.interactive"
       wienSeries = plots.select ".wien"
 
 
@@ -334,7 +333,7 @@ define ["./explanation.js"], (Exp)->
             Math.min(val, temperatures.slice(-1)[0])
           api.update()
 
-      slider = plotSvg.selectAll ".slider"
+      slider = svg.selectAll ".slider"
         .data [1]
         .call (slider) ->
           slider = slider.enter()
