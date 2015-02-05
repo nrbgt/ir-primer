@@ -102,7 +102,15 @@ define ["./explanation.js"], (Exp)->
       # probably not reentrant
       selection.classed planck: true, explanation: true
 
-      explore = ->
+      # slider stuff
+      slide = d3.behavior.drag()
+        .on "drag", (value) ->
+          val = parseInt scales.slider.invert d3.event.y
+          TEMPERATURE = Math.max temperatures[0],
+            Math.min(val, temperatures.slice(-1)[0])
+          api.update()
+
+      api.explore = ->
         [mouseX, mouseY] = d3.mouse @
         WAVELENGTH = scales.x.invert mouseX
 
@@ -111,14 +119,6 @@ define ["./explanation.js"], (Exp)->
           Math.min(val, temperatures.slice(-1)[0])
 
         api.update()
-
-      # slider stuff
-      slide = d3.behavior.drag()
-        .on "drag", (value) ->
-          val = parseInt scales.slider.invert d3.event.y
-          TEMPERATURE = Math.max temperatures[0],
-            Math.min(val, temperatures.slice(-1)[0])
-          api.update()
 
       api.update = ->
         series = makeSeries TEMPERATURE
@@ -234,7 +234,7 @@ define ["./explanation.js"], (Exp)->
 
         api.update()
 
-      svg = selection.selectAll ".plot.planck"
+      svg = selection.selectAll ".plot"
         .data [1]
         .call (svg) ->
           svg = svg.enter()
@@ -253,7 +253,7 @@ define ["./explanation.js"], (Exp)->
             .call (plots) ->
               plots.append "rect"
                 .classed bg: true
-                .on mousemove: explore
+                .on mousemove: api.explore
 
               plots.append "g"
                 .classed solutions: true

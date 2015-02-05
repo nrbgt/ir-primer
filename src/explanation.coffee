@@ -35,3 +35,4 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
     laws: laws
     constants: C
     scientificNotation: scientificNotation
+    math: math

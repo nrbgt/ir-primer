@@ -13,16 +13,32 @@ html(lang="en")
   body
     .titles
       .title
-        h1 Temperature Functions
+        h1 Celsius
         blockquote
           :markdown
             TBD
         .equation.
           $$
-          I(\lambda,T) =
-          \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
+          K = C+273.15
           $$
-          
+      .title
+        h1 Fahrenheit
+        blockquote
+          :markdown
+            TBD
+        .equation.
+          $$
+          K=(F+459.67)\times\frac{5}{9}
+          $$
+      .title
+        h1 Rankine
+        blockquote
+          :markdown
+            TBD
+        .equation.
+          $$
+          K=R\times\frac{5}{9}
+          $$
     .explanation
 
     script(src="./bower_components/requirejs/require.js")
