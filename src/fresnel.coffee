@@ -20,8 +20,6 @@ define [], ->
     d3.select window
       .on "resize.fresnel": api.resize
 
-    resize()
-
-    return api
+    return api.resize()
 
   return Fresnel

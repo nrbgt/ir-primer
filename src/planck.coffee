@@ -402,7 +402,7 @@ define ["./explanation.js"], (Exp)->
       api.resize()
 
     # end of the instance api
-    return api
+    return api.resize()
 
   # THIS IS THE END of the library
   return Planck
