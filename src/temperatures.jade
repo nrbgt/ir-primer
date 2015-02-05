@@ -1,0 +1,35 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="utf-8")
+
+    style: :stylus
+      @import "./temperatures.css"
+      @import "./standalone.css"
+        
+    include ./lib/mathjax.jade
+
+
+  body
+    .titles
+      .title
+        h1 Temperature Functions
+        blockquote
+          :markdown
+            TBD
+        .equation.
+          $$
+          I(\lambda,T) =
+          \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
+          $$
+          
+    .explanation
+
+    script(src="./bower_components/requirejs/require.js")
+    script
+      :coffee
+        require ["./bower_components/d3/d3.js", "./temperatures.js"],
+          (d3, Temperatures) ->
+            temperatures = Temperatures d3
+            plot = d3.select ".explanation"
+              .call temperatures

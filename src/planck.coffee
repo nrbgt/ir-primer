@@ -63,9 +63,6 @@ define ["./explanation.js"], (Exp)->
     WAVELENGTH = wavelengths.slice(-1)[0]
     HOVERWIEN = false
 
-    color = d3.scale.category20b()
-    temperatureColor = (d) -> color d.temperature
-
     # data
     references = temperatures.map makeSeries
 
@@ -74,6 +71,7 @@ define ["./explanation.js"], (Exp)->
       .x (d) -> scales.x d[0]
       .y (d) -> scales.y d[1]
 
+    temperatureColor = (d) -> scales.color d.temperature
 
     plotSeries = (series) ->
       # generate an svg path from a series
@@ -89,21 +87,15 @@ define ["./explanation.js"], (Exp)->
           .data (d) -> [d.spectral_exitance]
           .attr d: seriesPath
 
-    # scales
-    scales = {}
-    scales.x = d3.scale.log()
-      .domain xDomain
-    scales.y = d3.scale.log()
-      .domain yDomain
-    scales.slider = d3.scale.log()
-      .domain d3.extent temperatures
+    scales =
+      x: d3.scale.log().domain xDomain
+      y: d3.scale.log().domain yDomain
+      slider: d3.scale.log().domain d3.extent temperatures
+      color: d3.scale.category20b()
 
-    xAxis = d3.svg.axis()
-      .scale scales.x
-      .orient 'bottom'
-    yAxis = d3.svg.axis()
-      .scale scales.y
-      .orient 'left'
+    axes =
+      x: d3.svg.axis().scale(scales.x).orient 'bottom'
+      y: d3.svg.axis().scale(scales.y).orient 'left'
 
 
     api = (selection) ->
@@ -210,13 +202,13 @@ define ["./explanation.js"], (Exp)->
           x: padding.left
 
         el_xAxis.attr transform: "translate(0, #{ HEIGHT - padding.bottom })"
-          .call xAxis
+          .call axes.x
           .selectAll "text"
           .text ->
             parseFloat this.textContent unless not this.textContent
 
         el_yAxis.attr transform: "translate(#{ padding.left }, 0)"
-          .call yAxis
+          .call axes.y
           .selectAll "text"
           .text -> expwn this.textContent
 

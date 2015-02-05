@@ -1,8 +1,9 @@
-define [], ()->
+define ["./bower_components/mathjs/dist/math.js"], (math)->
   C =
     boltzman1: -> 3.74e8
     boltzman2: -> 1.44e4
     wien: -> 2898
+    zeroKelvin: -> -273.15
 
   laws =
     Planck: (temperature, wavelength) ->
@@ -14,6 +15,7 @@ define [], ()->
 
     Wien: (temperature) ->
       C.wien() / temperature
+
 
   scientificNotation = (d) ->
     return unless d
