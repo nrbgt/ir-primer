@@ -12,10 +12,18 @@ define ["./explanation.js"], (Exp)->
     plancksLaw temperature, Exp.laws.Wien temperature
 
   # magic numbers
-  padding = top: 40, left: 120, right: 80, bottom: 90
-  sliderPadding = {
-    top: 80, left: 10, right: 10, bottom: 110, temperature: 40, solution: 140
-  }
+  padding =
+    top: 40
+    left: 120
+    right: 80
+    bottom: 90
+  sliderPadding =
+    top: 80
+    left: 10
+    right: 10
+    bottom: 110
+    temperature: 40
+    solution: 140
   xDomain = [0.1, 100]
   yDomain = [1e-4, 1e9]
   axisW = 20
@@ -186,11 +194,10 @@ define ["./explanation.js"], (Exp)->
         plotSvg.attr width: WIDTH, height: HEIGHT
 
         plotsBg.attr width: WIDTH - padding.right - sidebarWidth, height: HEIGHT
-        clip.attr {
+        clip.attr
           width: xScale.range().slice(-1),
           height: yScale.range()[0],
           x: padding.left
-        }
 
         el_xAxis.attr transform: "translate(0, #{ HEIGHT - padding.bottom })"
           .call xAxis
@@ -251,14 +258,13 @@ define ["./explanation.js"], (Exp)->
 
               plots.append "g"
                 .classed wien: true
-                .on {
+                .on
                   mouseover: ->
                     HOVERWIEN = true
                     api.update()
                   mouseout: ->
                     HOVERWIEN = false
                     api.update()
-                }
                 .append "path"
 
           plotSvg.append "g"
@@ -351,26 +357,25 @@ define ["./explanation.js"], (Exp)->
 
           slider.selectAll ".reference"
             .data references
-            .call (init) ->
-              init = init.enter()
+            .call (slider) ->
+              slider = slider.enter()
                 .append "g"
                 .classed reference: true
 
-              init.append "circle"
+              slider.append "circle"
                 .attr sliderCircle
                 .style fill: temperatureColor
 
-              init.append "text"
+              slider.append "text"
                 .classed temperature: true
                 .text (d) -> d.temperature
-                .attr {
+                .attr
                   dy: ".35em"
                   "text-anchor": "end"
                   x: sliderPadding.temperature
-                }
                 .style fill: temperatureColor
 
-              init.append "text"
+              slider.append "text"
                 .classed solution: true
                 .attr x: sliderPadding.solution, dy: ".35em", "text-anchor": "end"
                 .style fill: temperatureColor
@@ -402,7 +407,7 @@ define ["./explanation.js"], (Exp)->
       api.resize()
 
     # end of the instance api
-    return api.resize()
+    return api
 
   # THIS IS THE END of the library
   return Planck
