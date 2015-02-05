@@ -398,7 +398,7 @@ define ["./explanation.js"], (Exp)->
 
       resize()
 
-    # end of the
+    # end of the instance api
     return api
 
   # THIS IS THE END of the library
