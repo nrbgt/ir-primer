@@ -122,7 +122,7 @@ define [], ->
 
     api = (selection) ->
       # probably not reentrant
-      selection.classed planck: true
+      selection.classed planck: true, explanation: true
 
       explore = ->
         [mouseX, mouseY] = d3.mouse @

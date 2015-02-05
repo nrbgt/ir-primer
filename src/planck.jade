@@ -5,80 +5,43 @@ html(lang="en")
 
     style: :stylus
       @import "./planck.css"
-      body
-        overflow hidden
-        margin 0
-        padding 0
-        font-family "MathJax_Main"
-      
-      .title
-        position absolute
-        left 15%
-        width 30%
-
-        &.wien
-          left inherit
-          right 15%
-          h1
-            color #900
-
-
+      @import "./standalone.css"
+      .title.wien
+        left inherit
+        right 15%
         h1
-          margin 0
-          padding 0
-          text-align center
-        blockquote
-          margin 0
-          padding 0
-          text-align justify
-        .equation
-          font-size 150%
-          
-      
-      .my-planck
-        position absolute
-        left 0
-        right 0
-        bottom 0
-        top 250px
+          color #900
         
-        
+    include ./lib/mathjax.jade
 
-    script(type="text/x-mathjax-config")
-      :coffee
-        MathJax.Hub.Config {
-          tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
-        }
-    script(
-      src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML")
 
   body
-
-    .title.wien
-      h1 Wien's Law
-      blockquote
-        :markdown
-          It can be shown that the wavelength maximum for any temperature is
-      .equation.
-        $${\lambda{max}}{\cdot}{T}=2898{\mu}m-K$$
-    .title
-      h1 Planck's Law
-      blockquote
-        :markdown
-          The EM modes exist with only discrete energies that are multiples
-          of $hv$, where $h$ is Planck's constant and $v$ is frequency.
-      .equation.
-        $$
-        I(\lambda,T) =
-        \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
-        $$
+    .titles
+      .title
+        h1 Planck's Law
+        blockquote
+          :markdown
+            The EM modes exist with only discrete energies that are multiples
+            of $hv$, where $h$ is Planck's constant and $v$ is frequency.
+        .equation.
+          $$
+          I(\lambda,T) =
+          \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
+          $$
+      .title.wien
+        h1 Wien's Law
+        blockquote
+          :markdown
+            It can be shown that the wavelength maximum for any temperature is
+        .equation.
+          $${\lambda{max}}{\cdot}{T}=2898{\mu}m-K$$
           
-    .my-planck
+    .explanation
 
     script(src="./bower_components/requirejs/require.js")
     script
       :coffee
         require ["./bower_components/d3/d3.js", "./planck.js"], (d3, Planck) ->
           planck = Planck d3
-          plot = d3.select ".my-planck"
+          plot = d3.select ".explanation"
             .call planck
