@@ -46,45 +46,27 @@ def slides(infile="An IR Primer.ipynb",
 
 
 def planck():
+    return explanation("planck")
+
+def explanation(name):
+    ex_id = str(random()).split(".")[1]
     return HTML("""
-        <style>
-            @import url("./dist/planck.css");
-            #planck-%(id)s{
-                background-color: white;
-            }
-        </style>
-        <div id="planck-%(id)s" class="stretch"></div>
+        <style>@import url("./dist/%(name)s.css");</style>
+        <div id="%(name)s-%(id)s"></div>
         <script>
             require(
                 [
+                    "./dist/%(name)s.js",
+                    "./dist/ipython-explanation.js",
                     "./dist/bower_components/d3/d3.min.js",
-                    "./dist/planck.js"
+                    "jquery"
                 ],
-                function(d3, Planck){
-                    var planck = Planck(d3);
-                    var wrapper = d3.select("#planck-%(id)s")
-                        .style({
-                            "background-color": "white",
-                            width: "100%%",
-                            height: "800px",
-                        })
-                        .call(planck);
-                    if(window.Reveal){
-                        var _window = d3.select(window);
-                        Reveal.addEventListener(
-                            "slidechanged",
-                            function(event){
-                                $(window).resize();
-                            }
-                        );
-                        .on("resize.planck-%(id)s", function(){
-                            wrapper.style({
-                                width: window.innerWidth + "px",
-                                height: window.innerHeight + "px"
-                            })
-                            planck.resize();
-                        });
-                    }
-            });
+                function(Explanation, Loader, d3, $){{
+                    Loader("%(name)s-%(id)s", Explanation, d3, $);
+                }}
+            );
         </script>
-        """ % dict(id=str(random()).split(".")[1]))
+        """ % {
+            "id": str(random()).split(".")[1],
+            "name": name
+        })

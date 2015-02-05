@@ -23,15 +23,18 @@ define [], ->
 
   # magic numbers
   padding = top: 40, left: 120, right: 80, bottom: 90
+  sliderPadding = {
+    top: 80, left: 10, right: 10, bottom: 110, temperature: 40, solution: 140
+  }
   xDomain = [0.1, 100]
   yDomain = [1e-4, 1e9]
   axisW = 20
-  sliderCircle = r: 18, cx: 22
-  sidebarWidth = 150
+  sliderCircle = r: 5, cx: 0
+  sidebarWidth = 180
 
   # data
-  wavelengths = (i for i in [0..0.95] by 0.05)
-     .concat (i for i in [1..19.5] by 0.5)
+  wavelengths = (i for i in [0.1..1.99] by 0.01)
+     .concat (i for i in [2..19.5] by 0.5)
      .concat (i for i in [20..100] by 1)
 
   temperatures = [
@@ -122,7 +125,13 @@ define [], ->
       selection.classed planck: true
 
       explore = ->
-        WAVELENGTH = xScale.invert d3.mouse(@)[0]
+        [mouseX, mouseY] = d3.mouse @
+        WAVELENGTH = xScale.invert mouseX
+
+        val = parseInt sliderScale.invert mouseY
+        TEMPERATURE = Math.max temperatures[0],
+          Math.min(val, temperatures.slice(-1)[0])
+
         render()
 
       render = ->
@@ -131,6 +140,7 @@ define [], ->
             wiensLaw TEMPERATURE
           else
             plancksLaw TEMPERATURE, WAVELENGTH
+
         slideHandle.attr transform: "translate(0, #{ sliderScale TEMPERATURE })"
         handleLabel.text TEMPERATURE
         handleSolution.text if solution[1] then "I: #{expwn solution[1]}" else ""
@@ -222,10 +232,11 @@ define [], ->
           .call plotSeries
 
         sliderScale.range [
-          HEIGHT - (sliderCircle.r * 4),
-          sliderCircle.r * 4
+          HEIGHT - sliderPadding.bottom
+          sliderPadding.top
         ]
-        slider.attr transform: "translate(#{ WIDTH - sidebarWidth + 20 }, 0)"
+        slider.attr transform: "translate(#{ xScale.range()[1] + 20 }, 0)"
+        sliderLabel.attr transform: "translate(#{ sidebarWidth }, #{ HEIGHT/2 }) rotate(90)"
         sliderReferences.attr transform: (d) ->
           "translate(0, #{ sliderScale d.temperature })"
 
@@ -289,17 +300,26 @@ define [], ->
                 .classed unit: true
                 .text " [W/m²-µm]"
 
+              yLabel.append "tspan"
+                .classed variable: true
+                .text " I(λ,T)"
+
           plotSvg.append "g"
             .classed label: true, x: true
             .append "text"
             .attr "text-anchor": "middle", dy: ".71em", y: -10
-            .call (yLabel) ->
-              yLabel.append "tspan"
+            .call (xLabel) ->
+              xLabel.append "tspan"
                 .text "Wavelength"
 
-              yLabel.append "tspan"
+              xLabel.append "tspan"
                 .classed unit: true
                 .text " [µm]"
+
+              xLabel.append "tspan"
+                .classed variable: true
+                .text " λ"
+
 
           plotSvg.append "g"
             .classed wavelength: true, interactive: true
@@ -338,13 +358,16 @@ define [], ->
 
           slider.append "text"
             .classed label: true
-            .attr y: sliderCircle.r * 2, x: sliderCircle.r * .5
+            .attr "text-anchor": "middle"
             .call (sliderLabel) ->
               sliderLabel.append "tspan"
-                .text "T"
+                .text "Temperature"
               sliderLabel.append "tspan"
-                .text "[°K]"
+                .text " [K]"
                 .classed unit: true
+              sliderLabel.append "tspan"
+                .text " T"
+                .classed variable: true
 
 
           slider.selectAll ".reference"
@@ -361,28 +384,36 @@ define [], ->
               init.append "text"
                 .classed temperature: true
                 .text (d) -> d.temperature
-                .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
+                .attr {
+                  dy: ".35em"
+                  "text-anchor": "end"
+                  x: sliderPadding.temperature
+                }
+                .style fill: temperatureColor
 
               init.append "text"
                 .classed solution: true
-                .attr x: sliderCircle.r * 2.5, dy: ".35em"
+                .attr x: sliderPadding.solution, dy: ".35em", "text-anchor": "end"
                 .style fill: temperatureColor
 
           slider.append "g"
             .classed handle: true
             .call (slideHandle) ->
-                slideHandle.call slide
-                slideHandle.append "circle"
-                  .attr sliderCircle
-                slideHandle.append "text"
-                  .classed temperature: true
-                  .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
-                slideHandle.append "text"
-                  .classed solution: true
-                  .attr "text-anchor": "end", dy: ".35em", dx: -5
+              slideHandle.call slide
+              slideHandle.append "circle"
+                .attr sliderCircle
+              """
+              slideHandle.append "text"
+                .classed temperature: true
+                .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
+              slideHandle.append "text"
+                .classed solution: true
+                .attr "text-anchor": "end", dy: ".35em", dx: -5
+              """
 
       sliderReferences = slider.selectAll ".reference"
       slideHandle = slider.select ".handle"
+      sliderLabel = slider.select "text"
       handleLabel = slideHandle.select "text.temperature"
       handleSolution = slideHandle.select "text.solution"
 
