@@ -2,6 +2,9 @@
   overflow: hidden;
   font-family: MathJax_Main;
 }
+.planck tspan.variable {
+  font-style: italic;
+}
 .planck .slider {
   margin-top: 10px;
 }
@@ -12,7 +15,7 @@
   fill: #fff;
 }
 .planck .slider .handle circle {
-  fill: #000;
+  fill: transparent;
   stroke: #000;
   stroke-width: 2px;
 }
