@@ -1,0 +1,29 @@
+body {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: "MathJax_Main";
+}
+.titles {
+  display: flex;
+}
+.titles .title {
+  flex: 1;
+  text-align: center;
+}
+.titles .title blockquote {
+  text-align: justify;
+}
+.titles .title.wien h1 {
+  color: #900;
+}
+.titles .title .equation {
+  font-size: 150%;
+}
+.explanation {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 250px;
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <style>@import "./temperatures.css";
+@import "./standalone.css";
+
+    </style>
+    <script type="text/x-mathjax-config">(function() {
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  });
+
+}).call(this);
+
+    </script>
+    <script src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  </head>
+  <body>
+    <div class="titles">
+      <div class="title">
+        <h1>Celsius</h1>
+        <blockquote><p>TBD</p>
+
+        </blockquote>
+        <div class="equation">
+          $$
+          K = C+273.15
+          $$
+        </div>
+      </div>
+      <div class="title">
+        <h1>Fahrenheit</h1>
+        <blockquote><p>TBD</p>
+
+        </blockquote>
+        <div class="equation">
+          $$
+          K=(F+459.67)\times\frac{5}{9}
+          $$
+        </div>
+      </div>
+      <div class="title">
+        <h1>Rankine</h1>
+        <blockquote><p>TBD</p>
+
+        </blockquote>
+        <div class="equation">
+          $$
+          K=R\times\frac{5}{9}
+          $$
+        </div>
+      </div>
+    </div>
+    <div class="explanation"></div>
+    <script src="./bower_components/requirejs/require.js"></script>
+    <script>(function() {
+  require(["./bower_components/d3/d3.js", "./temperatures.js"], function(d3, Temperatures) {
+    var plot, temperatures;
+    temperatures = Temperatures(d3);
+    return plot = d3.select(".explanation").call(temperatures);
+  });
+
+}).call(this);
+
+    </script>
+  </body>
+</html>

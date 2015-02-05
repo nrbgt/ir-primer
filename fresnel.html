@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <style>@import "./fresnel.css";
+@import "./standalone.css";
+
+    </style>
+    <script type="text/x-mathjax-config">(function() {
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  });
+
+}).call(this);
+
+    </script>
+    <script src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  </head>
+  <body>
+    <div class="titles">
+      <div class="title">
+        <h1>Fresnel Functions</h1>
+        <blockquote><p>TBD</p>
+
+        </blockquote>
+        <div class="equation">
+          $$
+          I(\lambda,T) =
+          \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
+          $$
+          
+        </div>
+      </div>
+    </div>
+    <div class="explanation"></div>
+    <script src="./bower_components/requirejs/require.js"></script>
+    <script>(function() {
+  require(["./bower_components/d3/d3.js", "./fresnel.js"], function(d3, Fresnel) {
+    var fresnel, plot;
+    fresnel = Fresnel(d3);
+    return plot = d3.select(".explanation").call(fresnel);
+  });
+
+}).call(this);
+
+    </script>
+  </body>
+</html>

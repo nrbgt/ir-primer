@@ -3,43 +3,13 @@
   <head>
     <meta charset="utf-8">
     <style>@import "./planck.css";
-body {
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  font-family: "MathJax_Main";
-}
-.title {
-  position: absolute;
-  left: 15%;
-  width: 30%;
-}
+@import "./standalone.css";
 .title.wien {
   left: inherit;
   right: 15%;
 }
 .title.wien h1 {
   color: #900;
-}
-.title h1 {
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-.title blockquote {
-  margin: 0;
-  padding: 0;
-  text-align: justify;
-}
-.title .equation {
-  font-size: 150%;
-}
-.my-planck {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 250px;
 }
 
     </style>
@@ -56,34 +26,38 @@ body {
     <script src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   </head>
   <body>
-    <div class="title wien">
-      <h1>Wien's Law</h1>
-      <blockquote><p>It can be shown that the wavelength maximum for any temperature is</p>
-
-      </blockquote>
-      <div class="equation">$${\lambda{max}}{\cdot}{T}=2898{\mu}m-K$$</div>
-    </div>
-    <div class="title">
-      <h1>Planck's Law</h1>
-      <blockquote><p>The EM modes exist with only discrete energies that are multiples
+    <div class="titles">
+      <div class="title">
+        <h1>Planck's Law</h1>
+        <blockquote><p>The EM modes exist with only discrete energies that are multiples
 of $hv$, where $h$ is Planck&#39;s constant and $v$ is frequency.</p>
 
-      </blockquote>
-      <div class="equation">
-        $$
-        I(\lambda,T) =
-        \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
-        $$
+        </blockquote>
+        <div class="equation">
+          $$
+          I(\lambda,T) =
+          \frac{2 hc^2}{\lambda^5}\frac{1}{ e^{\frac{hc}{\lambda kT}}-1}
+          $$
+        </div>
+      </div>
+      <div class="title wien">
+        <h1>Wien's Law</h1>
+        <blockquote><p>It can be shown that the wavelength maximum for any temperature is</p>
+
+        </blockquote>
+        <div class="equation">
+          $${\lambda{max}}{\cdot}{T}=2898{\mu}m-K$$
           
+        </div>
       </div>
     </div>
-    <div class="my-planck"></div>
+    <div class="explanation"></div>
     <script src="./bower_components/requirejs/require.js"></script>
     <script>(function() {
   require(["./bower_components/d3/d3.js", "./planck.js"], function(d3, Planck) {
     var planck, plot;
     planck = Planck(d3);
-    return plot = d3.select(".my-planck").call(planck);
+    return plot = d3.select(".explanation").call(planck);
   });
 
 }).call(this);
