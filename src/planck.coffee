@@ -1,25 +1,15 @@
-define [], ->
+define ["./explanation.js"], (Exp)->
   d3 = null
-
-  # constants
-  c1_boltzman = 3.74e8
-  c2_boltzman = 1.44e4
-  c_wien = 2898
-
 
   # formulae
   plancksLaw = (temperature, wavelength) ->
     [
-      wavelength,
-      c1_boltzman / (
-        (wavelength ** 5) * (
-          Math.exp(c2_boltzman / (wavelength * temperature)) - 1
-        )
-      )
+      wavelength
+      Exp.laws.Planck temperature, wavelength
     ]
 
   wiensLaw = (temperature) ->
-    plancksLaw temperature, (c_wien / temperature)
+    plancksLaw temperature, Exp.laws.Wien temperature
 
   # magic numbers
   padding = top: 40, left: 120, right: 80, bottom: 90
@@ -44,21 +34,8 @@ define [], ->
 
   wiens = temperatures.map (temperature) -> wiensLaw temperature
 
-
-
   # d3 generatory things
-  expwn = (d) ->
-    return unless d
-    parseFloat(d).toExponential 1
-      .replace /^(.*)e([+-])(\d*)$/,
-        (match, mag, sign, exp)->
-          mag = if mag == "1.0" then "" else mag.replace(/\.0$/, "") + "×"
-          sign = if sign == "-" then "⁻" else ""
-
-          exp = exp.split ""
-            .map (e) -> "⁰¹²³⁴⁵⁶⁷⁸⁹"[+e]
-            .join ""
-          mag + "10" + sign + exp
+  expwn = Exp.scientificNotation
 
 
   makeSeries = (temperature)->
@@ -87,7 +64,6 @@ define [], ->
     seriesPath = d3.svg.line()
       .x (d) -> xScale d[0]
       .y (d) -> yScale d[1]
-      #.interpolate "linea"
 
     sliderScale = d3.scale.log()
       .domain d3.extent temperatures
