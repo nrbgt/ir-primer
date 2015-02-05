@@ -108,9 +108,9 @@ define ["./explanation.js"], (Exp)->
         TEMPERATURE = Math.max temperatures[0],
           Math.min(val, temperatures.slice(-1)[0])
 
-        render()
+        api.update()
 
-      render = ->
+      api.update = ->
         series = makeSeries TEMPERATURE
         solution = if HOVERWIEN
             wiensLaw TEMPERATURE
@@ -172,8 +172,11 @@ define ["./explanation.js"], (Exp)->
           .attr transform: (d) ->
             "translate(#{xScale d.solution[0]}, #{yScale d.solution[1]} )"
 
+        # for chaining
+        api
+
       # update screen-relevant stuff
-      resize = api.resize = ->
+      api.resize = (event)->
         WIDTH = selection.node().clientWidth
         HEIGHT = selection.node().clientHeight
 
@@ -220,7 +223,7 @@ define ["./explanation.js"], (Exp)->
           .data [wiens]
           .attr d: seriesPath
 
-        render()
+        api.update()
 
       plotSvg = selection.selectAll ".plot.planck"
         .data [1]
@@ -251,10 +254,10 @@ define ["./explanation.js"], (Exp)->
                 .on {
                   mouseover: ->
                     HOVERWIEN = true
-                    render()
+                    api.update()
                   mouseout: ->
                     HOVERWIEN = false
-                    render()
+                    api.update()
                 }
                 .append "path"
 
@@ -323,7 +326,7 @@ define ["./explanation.js"], (Exp)->
           val = parseInt sliderScale.invert d3.event.y
           TEMPERATURE = Math.max temperatures[0],
             Math.min(val, temperatures.slice(-1)[0])
-          render()
+          api.update()
 
       slider = plotSvg.selectAll ".slider"
         .data [1]
@@ -394,9 +397,9 @@ define ["./explanation.js"], (Exp)->
       handleSolution = slideHandle.select "text.solution"
 
       d3.select window
-        .on "resize.planck": resize
+        .on "resize.planck": api.resize
 
-      resize()
+      api.resize()
 
     # end of the instance api
     return api
