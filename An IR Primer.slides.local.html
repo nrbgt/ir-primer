@@ -11528,7 +11528,8 @@ div.output_prompt {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span class="kn">from</span> <span class="nn">irprimer</span> <span class="k">import</span> <span class="n">planck</span><span class="p">,</span> <span class="n">slides</span>
+<div class=" highlight hl-ipython3"><pre><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">display</span>
+<span class="kn">from</span> <span class="nn">irprimer</span> <span class="k">import</span> <span class="n">Planck</span><span class="p">,</span> <span class="n">Temperatures</span><span class="p">,</span> <span class="n">slides</span>
 </pre></div>
 
 </div>
@@ -11568,6 +11569,51 @@ div.output_prompt {
 <h1 id="Temperatures">Temperatures<a class="anchor-link" href="#Temperatures">&#182;</a></h1>
 </div>
 </div>
+</div></section><section>
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span class="n">Temperatures</span><span class="p">()</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+
+            <style>@import url("./temperatures.css");</style>
+            <div id="temperatures-7818055722085595"></div>
+            <script>
+                require(
+                    [
+                        "./temperatures.js",
+                        "./ipython-explanation.js",
+                        "./bower_components/d3/d3.min.js",
+                        "jquery"
+                    ],
+                    function(Explanation, Loader, d3, $){{
+                        Loader("temperatures-7818055722085595", Explanation, d3, $);
+                    }}
+                );
+            </script>
+        
+</div>
+
+</div>
+
+</div>
+</div>
+
 </div></section>
     </section><section>
     <section>
@@ -11605,10 +11651,10 @@ $$
     
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span class="n">planck</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span class="n">Planck</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -11619,25 +11665,25 @@ $$
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[2]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[3]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
-        <style>@import url("./planck.css");</style>
-        <div id="planck-1985140435039472" class="stretch"></div>
-        <script>
-            require(
-                [
-                    "./planck.js",
-                    "./ipython-explanation.js",
-                    "./bower_components/d3/d3.min.js",
-                    "jquery"
-                ],
-                function(Explanation, Loader, d3, $){{
-                    Loader("planck-1985140435039472", Explanation, d3, $);
-                }}
-            );
-        </script>
+            <style>@import url("./planck.css");</style>
+            <div id="planck-5480007771815775"></div>
+            <script>
+                require(
+                    [
+                        "./planck.js",
+                        "./ipython-explanation.js",
+                        "./bower_components/d3/d3.min.js",
+                        "jquery"
+                    ],
+                    function(Explanation, Loader, d3, $){{
+                        Loader("planck-5480007771815775", Explanation, d3, $);
+                    }}
+                );
+            </script>
         
 </div>
 
@@ -11686,7 +11732,7 @@ $$
     
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">slides</span><span class="p">()</span>

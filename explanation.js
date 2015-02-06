@@ -22,6 +22,15 @@
       },
       Wien: function(temperature) {
         return C.wien() / temperature;
+      },
+      Celsius: function(kelvin) {
+        return math.unit(kelvin, "K").toNumber("degC");
+      },
+      Fahrenheit: function(kelvin) {
+        return math.unit(kelvin, "K").toNumber("degF");
+      },
+      Rankine: function(kelvin) {
+        return math.unit(kelvin, "K").toNumber("degR");
       }
     };
     scientificNotation = function(d) {

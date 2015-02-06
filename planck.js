@@ -189,7 +189,7 @@
           return api;
         };
         api.resize = function(event) {
-          var HEIGHT, WIDTH, el_references;
+          var HEIGHT, WIDTH;
           WIDTH = selection.node().clientWidth;
           HEIGHT = selection.node().clientHeight;
           scales.x.range([padding.left, WIDTH - padding.right - sidebarWidth]);
@@ -225,7 +225,7 @@
           xLabel.attr({
             transform: "translate(" + [WIDTH / 2, HEIGHT - 50] + ")"
           });
-          el_references = plots.selectAll('.series').data(references).call(plotSeries);
+          plots.selectAll('.series').data(references).call(plotSeries);
           scales.slider.range([HEIGHT - sliderPadding.bottom, sliderPadding.top]);
           slider.attr({
             transform: "translate(" + (scales.x.range()[1] + 20) + ", 0)"
@@ -260,7 +260,7 @@
             plots.append("rect").classed({
               bg: true
             }).on({
-              mousemove: api.explore
+              "mousemove.planck": api.explore
             });
             plots.append("g").classed({
               solutions: true
@@ -352,33 +352,32 @@
               variable: true
             });
           });
-          slider.selectAll(".reference").data(references).call(function(slider) {
-            slider = slider.enter().append("g").classed({
-              reference: true
-            });
-            slider.append("circle").attr(sliderCircle).style({
+          slider.selectAll(".reference").data(references).enter().append("g").classed({
+            reference: true
+          }).call(function(reference) {
+            reference.append("circle").attr(sliderCircle).style({
               fill: temperatureColor
             });
-            return slider.append("text").classed({
+            reference.append("text").classed({
               temperature: true
             }).text(function(d) {
               return d.temperature;
+            }).style({
+              fill: temperatureColor
             }).attr({
               dy: ".35em",
               "text-anchor": "end",
               x: sliderPadding.temperature
+            });
+            return reference.append("text").classed({
+              solution: true
+            }).attr({
+              x: sliderPadding.solution,
+              dy: ".35em",
+              "text-anchor": "end"
             }).style({
               fill: temperatureColor
             });
-          });
-          slider.append("text").classed({
-            solution: true
-          }).attr({
-            x: sliderPadding.solution,
-            dy: ".35em",
-            "text-anchor": "end"
-          }).style({
-            fill: temperatureColor
           });
           return slider.append("g").classed({
             handle: true
