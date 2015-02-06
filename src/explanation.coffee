@@ -16,6 +16,18 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
     Wien: (temperature) ->
       C.wien() / temperature
 
+    Celsius: (kelvin) ->
+      math.unit kelvin, "K"
+        .toNumber "degC"
+
+    Fahrenheit: (kelvin) ->
+      math.unit kelvin, "K"
+        .toNumber "degF"
+
+    Rankine: (kelvin) ->
+      math.unit kelvin, "K"
+        .toNumber "degR"
+
 
   scientificNotation = (d) ->
     return unless d

@@ -215,7 +215,7 @@ define ["./explanation.js"], (Exp)->
         yLabel.attr transform: "translate(10, #{ HEIGHT/2 }) rotate(-90)"
         xLabel.attr transform: "translate(#{ [WIDTH/2, HEIGHT - 50] })"
 
-        el_references = plots.selectAll '.series'
+        plots.selectAll '.series'
           .data references
           .call plotSeries
 
@@ -253,7 +253,7 @@ define ["./explanation.js"], (Exp)->
             .call (plots) ->
               plots.append "rect"
                 .classed bg: true
-                .on mousemove: api.explore
+                .on "mousemove.planck": api.explore
 
               plots.append "g"
                 .classed solutions: true
@@ -350,25 +350,24 @@ define ["./explanation.js"], (Exp)->
 
           slider.selectAll ".reference"
             .data references
-            .call (slider) ->
-              slider = slider.enter()
-                .append "g"
-                .classed reference: true
-
-              slider.append "circle"
+            .enter()
+            .append "g"
+            .classed reference: true
+            .call (reference) ->
+              reference.append "circle"
                 .attr sliderCircle
                 .style fill: temperatureColor
 
-              slider.append "text"
+              reference.append "text"
                 .classed temperature: true
                 .text (d) -> d.temperature
+                .style fill: temperatureColor
                 .attr
                   dy: ".35em"
                   "text-anchor": "end"
                   x: sliderPadding.temperature
-                .style fill: temperatureColor
 
-              slider.append "text"
+              reference.append "text"
                 .classed solution: true
                 .attr x: sliderPadding.solution, dy: ".35em", "text-anchor": "end"
                 .style fill: temperatureColor

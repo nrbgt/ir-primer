@@ -3,7 +3,7 @@ from random import random
 import time
 
 from subprocess import Popen, PIPE
-from IPython.display import Javascript, HTML
+from IPython.display import Javascript, HTML, display_html
 
 replacements = {
     "//netdna.bootstrapcdn.com/font-awesome/4.1.0/":
@@ -45,28 +45,37 @@ def slides(infile="An IR Primer.ipynb",
         f.write(html)
 
 
-def planck():
-    return explanation("planck")
+class Explanation(object):
+    def __init__(self, id=None):
+        self.id = id or str(random()).split(".")[1]
 
-def explanation(name):
-    ex_id = str(random()).split(".")[1]
-    return HTML("""
-        <style>@import url("./dist/%(name)s.css");</style>
-        <div id="%(name)s-%(id)s"></div>
-        <script>
-            require(
-                [
-                    "./dist/%(name)s.js",
-                    "./dist/ipython-explanation.js",
-                    "./dist/bower_components/d3/d3.min.js",
-                    "jquery"
-                ],
-                function(Explanation, Loader, d3, $){{
-                    Loader("%(name)s-%(id)s", Explanation, d3, $);
-                }}
-            );
-        </script>
+    def display(self):
+        display_html(self)
+
+    def _repr_html_(self):
+        return """
+            <style>@import url("./dist/%(name)s.css");</style>
+            <div id="%(name)s-%(id)s"></div>
+            <script>
+                require(
+                    [
+                        "./dist/%(name)s.js",
+                        "./dist/ipython-explanation.js",
+                        "./dist/bower_components/d3/d3.min.js",
+                        "jquery"
+                    ],
+                    function(Explanation, Loader, d3, $){{
+                        Loader("%(name)s-%(id)s", Explanation, d3, $);
+                    }}
+                );
+            </script>
         """ % {
-            "id": str(random()).split(".")[1],
-            "name": name
-        })
+            "id": self.id,
+            "name": self.name
+        }
+
+class Planck(Explanation):
+    name = "planck"
+
+class Temperatures(Explanation):
+    name = "temperatures"
