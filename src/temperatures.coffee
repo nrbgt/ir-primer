@@ -62,6 +62,8 @@ define ["./explanation.js"], (Exp)->
             fn = seriesPath useScale[d.scaleIdx]
             fn d.points
 
+    dispatch = d3.dispatch "update"
+
     api = (selection) ->
       selection.classed
         explanation: true
@@ -69,9 +71,13 @@ define ["./explanation.js"], (Exp)->
 
       TEMPERATURE = 0
 
+
       api.explore = ->
         [mouseX, mouseY] = d3.mouse @
-        TEMPERATURE = scales.x.invert mouseX
+        TEMPERATURE = Math.min(
+          domains.x[1]
+          Math.max scales.x.invert(mouseX), domains.x[0]
+        )
 
         api.update()
 
@@ -81,6 +87,45 @@ define ["./explanation.js"], (Exp)->
             TEMPERATURE
             convert TEMPERATURE
           ]
+
+        dispatch.update
+          K: TEMPERATURE
+          C: scaleSolutions[0][1]
+          F: scaleSolutions[1][1]
+          R: scaleSolutions[2][1]
+
+        svg.selectAll ".solution.interactive"
+          .data [
+            [TEMPERATURE, TEMPERATURE]
+            [TEMPERATURE, scaleSolutions[0][1]]
+            [TEMPERATURE, scaleSolutions[1][1]]
+            [TEMPERATURE, scaleSolutions[2][1]]
+          ]
+          .call (solutionLabel) ->
+            solutionLabel.enter()
+              .append "g"
+              .classed solution: true, interactive: true
+              .append "text"
+              .style
+                fill: (d, i) -> ["black", "green", "red", "blue"][i]
+              .attr
+                "text-anchor": (d, i) ->
+                  if i == 0
+                    "middle"
+                  else if i == 1
+                    "start"
+                  else
+                    "end"
+          .attr
+            transform: (d, i) ->
+              if i == 0
+                "translate(#{scales.x d[1]}, #{padding.top - 10})"
+              else if i == 1
+                "translate(#{padding.left + 5}, #{scales.y0 d[1]})"
+              else
+                "translate(#{scales.x.range()[1] - 5}, #{scales.y1 d[1]})"
+          .select "text"
+            .text (d, i)-> "#{'KCFR'[i]} = #{d[1].toFixed 2}"
 
         solutions.selectAll ".solution.reference"
           .data scaleSolutions
@@ -109,9 +154,9 @@ define ["./explanation.js"], (Exp)->
 
         plotsBg.attr width: WIDTH - padding.right, height: HEIGHT
         clip.attr
-          width: scales.x.range().slice(-1),
+          width: WIDTH,
           height: scales.y0.range()[0],
-          x: padding.left
+          x: 0
 
         el_xAxis.attr transform: "translate(0, #{ HEIGHT - padding.bottom })"
           .call axes.x
@@ -128,8 +173,6 @@ define ["./explanation.js"], (Exp)->
           transform: "translate(10, #{ HEIGHT/2 }) rotate(-90)"
         y1Label.attr
           transform: "translate(#{ WIDTH - 10 }, #{ HEIGHT/2 }) rotate(90)"
-
-        console.log references
 
         plots.selectAll '.series'
           .data references
@@ -226,6 +269,8 @@ define ["./explanation.js"], (Exp)->
         .on "resize.temperatures": api.resize
 
       api.resize()
+
+    api.dispatch = dispatch
 
     return api
 

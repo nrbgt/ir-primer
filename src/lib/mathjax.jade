@@ -1,7 +1,14 @@
 script(type="text/x-mathjax-config")
   :coffee
-    MathJax.Hub.Config {
-      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
-    }
+    MathJax.Hub.Config
+      tex2jax: inlineMath: [
+        ['$', '$']
+        ['\\(','\\)']
+      ]
+      TeX: extensions: ["color.js"]
+    MathJax.Hub.Register.StartupHook "End",  () ->
+      window.mathjax.init MathJax unless not window.mathjax 
+
+
 script(
   src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML")

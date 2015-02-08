@@ -6,7 +6,12 @@ html(lang="en")
     style: :stylus
       @import "./temperatures.css"
       @import "./standalone.css"
-        
+      
+      .equation
+        visibility hidden
+      #MathJax_Message, .MathJax_Preview
+        display none
+      
     include ./lib/mathjax.jade
 
 
@@ -18,34 +23,62 @@ html(lang="en")
           :markdown
             TBD
         .equation.
-          $$
-          K = C+273.15
-          $$
+          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{kelvin}{RGB}{0,0,0}
+          \definecolor{celsius}{RGB}{0,128,0}
+          \definecolor{fahrenheit}{RGB}{128,0,0}
+          \definecolor{rankine}{RGB}{0,0,255}
+          \color{kelvin}<%= K %> \color{other}= \color{celsius}<%= C %>\color{other}+273.15
       .title
         h1 Fahrenheit
         blockquote
           :markdown
             TBD
         .equation.
-          $$
-          K=(F+459.67)\times\frac{5}{9}
-          $$
+          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{kelvin}{RGB}{0,0,0}
+          \definecolor{celsius}{RGB}{0,128,0}
+          \definecolor{fahrenheit}{RGB}{255,0,0}
+          \definecolor{rankine}{RGB}{0,0,255}
+          \color{kelvin}<%= K %>\color{other}=
+          (\color{fahrenheit}<%= F %>\color{other}+459.67)\times\frac{5}{9}
       .title
         h1 Rankine
         blockquote
           :markdown
             TBD
         .equation.
-          $$
-          K=R\times\frac{5}{9}
-          $$
+          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{kelvin}{RGB}{0,0,0}
+          \definecolor{celsius}{RGB}{0,128,0}
+          \definecolor{fahrenheit}{RGB}{255,0,0}
+          \definecolor{rankine}{RGB}{0,0,255}
+          \color{kelvin}<%= K %>\color{other}=\color{rankine}<%= R %>\color{other}\times\frac{5}{9}
     .explanation
 
     script(src="./bower_components/requirejs/require.js")
     script
       :coffee
-        require ["./bower_components/d3/d3.js", "./temperatures.js"],
-          (d3, Temperatures) ->
+        require ["./bower_components/d3/d3.js", "./temperatures.js", "fn.js"],
+          (d3, Temperatures, Fn) ->
             temperatures = Temperatures d3
+            
+            fn = Fn d3, MathJax
+              .replacements
+                K: "K"
+                C: "C"
+                R: "R"
+                F: "F"
+            
             plot = d3.select ".explanation"
               .call temperatures
+          
+            eq = d3.selectAll ".equation"
+              .call fn
+            
+            temperatures.dispatch.on "update", (replacements)->
+              for k, v of replacements
+                replacements[k] = v.toFixed 2
+              
+              eq.call fn.replacements replacements
+            
