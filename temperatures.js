@@ -32,7 +32,7 @@
       };
     });
     Temperatures = function(_d3) {
-      var api, axes, plotSeries, scales, seriesPath, useScale;
+      var api, axes, dispatch, plotSeries, scales, seriesPath, useScale;
       d3 = _d3;
       scales = {
         x: d3.scale.linear().domain(domains.x),
@@ -70,6 +70,7 @@
           }
         });
       };
+      dispatch = d3.dispatch("update");
       api = function(selection) {
         var TEMPERATURE, clip, defs, el_xAxis, el_y0Axis, el_y1Axis, plots, plotsBg, solutions, svg, xLabel, y0Label, y1Label;
         selection.classed({
@@ -80,13 +81,51 @@
         api.explore = function() {
           var mouseX, mouseY, _ref;
           _ref = d3.mouse(this), mouseX = _ref[0], mouseY = _ref[1];
-          TEMPERATURE = scales.x.invert(mouseX);
+          TEMPERATURE = Math.min(domains.x[1], Math.max(scales.x.invert(mouseX), domains.x[0]));
           return api.update();
         };
         api.update = function() {
           var scaleSolutions;
           scaleSolutions = converters.map(function(convert) {
             return [TEMPERATURE, convert(TEMPERATURE)];
+          });
+          dispatch.update({
+            K: TEMPERATURE,
+            C: scaleSolutions[0][1],
+            F: scaleSolutions[1][1],
+            R: scaleSolutions[2][1]
+          });
+          svg.selectAll(".solution.interactive").data([[TEMPERATURE, TEMPERATURE], [TEMPERATURE, scaleSolutions[0][1]], [TEMPERATURE, scaleSolutions[1][1]], [TEMPERATURE, scaleSolutions[2][1]]]).call(function(solutionLabel) {
+            return solutionLabel.enter().append("g").classed({
+              solution: true,
+              interactive: true
+            }).append("text").style({
+              fill: function(d, i) {
+                return ["black", "green", "red", "blue"][i];
+              }
+            }).attr({
+              "text-anchor": function(d, i) {
+                if (i === 0) {
+                  return "middle";
+                } else if (i === 1) {
+                  return "start";
+                } else {
+                  return "end";
+                }
+              }
+            });
+          }).attr({
+            transform: function(d, i) {
+              if (i === 0) {
+                return "translate(" + (scales.x(d[1])) + ", " + (padding.top - 10) + ")";
+              } else if (i === 1) {
+                return "translate(" + (padding.left + 5) + ", " + (scales.y0(d[1])) + ")";
+              } else {
+                return "translate(" + (scales.x.range()[1] - 5) + ", " + (scales.y1(d[1])) + ")";
+              }
+            }
+          }).select("text").text(function(d, i) {
+            return 'KCFR'[i] + " = " + (d[1].toFixed(2));
           });
           solutions.selectAll(".solution.reference").data(scaleSolutions).call(function(solution) {
             return solution.enter().append("g").classed({
@@ -124,9 +163,9 @@
             height: HEIGHT
           });
           clip.attr({
-            width: scales.x.range().slice(-1),
+            width: WIDTH,
             height: scales.y0.range()[0],
-            x: padding.left
+            x: 0
           });
           el_xAxis.attr({
             transform: "translate(0, " + (HEIGHT - padding.bottom) + ")"
@@ -146,7 +185,6 @@
           y1Label.attr({
             transform: "translate(" + (WIDTH - 10) + ", " + (HEIGHT / 2) + ") rotate(90)"
           });
-          console.log(references);
           plots.selectAll('.series').data(references).call(plotSeries);
           return api.update();
         };
@@ -240,6 +278,7 @@
         });
         return api.resize();
       };
+      api.dispatch = dispatch;
       return api;
     };
     return Temperatures;

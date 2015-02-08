@@ -4,12 +4,28 @@
     <meta charset="utf-8">
     <style>@import "./temperatures.css";
 @import "./standalone.css";
+.equation {
+  visibility: hidden;
+}
+#MathJax_Message,
+.MathJax_Preview {
+  display: none;
+}
 
     </style>
     <script type="text/x-mathjax-config">(function() {
   MathJax.Hub.Config({
     tex2jax: {
       inlineMath: [['$', '$'], ['\\(', '\\)']]
+    },
+    TeX: {
+      extensions: ["color.js"]
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook("End", function() {
+    if (!!window.mathjax) {
+      return window.mathjax.init(MathJax);
     }
   });
 
@@ -26,9 +42,12 @@
 
         </blockquote>
         <div class="equation">
-          $$
-          K = C+273.15
-          $$
+          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{kelvin}{RGB}{0,0,0}
+          \definecolor{celsius}{RGB}{0,128,0}
+          \definecolor{fahrenheit}{RGB}{128,0,0}
+          \definecolor{rankine}{RGB}{0,0,255}
+          \color{kelvin}<%= K %> \color{other}= \color{celsius}<%= C %>\color{other}+273.15
         </div>
       </div>
       <div class="title">
@@ -37,9 +56,13 @@
 
         </blockquote>
         <div class="equation">
-          $$
-          K=(F+459.67)\times\frac{5}{9}
-          $$
+          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{kelvin}{RGB}{0,0,0}
+          \definecolor{celsius}{RGB}{0,128,0}
+          \definecolor{fahrenheit}{RGB}{255,0,0}
+          \definecolor{rankine}{RGB}{0,0,255}
+          \color{kelvin}<%= K %>\color{other}=
+          (\color{fahrenheit}<%= F %>\color{other}+459.67)\times\frac{5}{9}
         </div>
       </div>
       <div class="title">
@@ -48,19 +71,37 @@
 
         </blockquote>
         <div class="equation">
-          $$
-          K=R\times\frac{5}{9}
-          $$
+          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{kelvin}{RGB}{0,0,0}
+          \definecolor{celsius}{RGB}{0,128,0}
+          \definecolor{fahrenheit}{RGB}{255,0,0}
+          \definecolor{rankine}{RGB}{0,0,255}
+          \color{kelvin}<%= K %>\color{other}=\color{rankine}<%= R %>\color{other}\times\frac{5}{9}
         </div>
       </div>
     </div>
     <div class="explanation"></div>
     <script src="./bower_components/requirejs/require.js"></script>
     <script>(function() {
-  require(["./bower_components/d3/d3.js", "./temperatures.js"], function(d3, Temperatures) {
-    var plot, temperatures;
+  require(["./bower_components/d3/d3.js", "./temperatures.js", "fn.js"], function(d3, Temperatures, Fn) {
+    var eq, fn, plot, temperatures;
     temperatures = Temperatures(d3);
-    return plot = d3.select(".explanation").call(temperatures);
+    fn = Fn(d3, MathJax).replacements({
+      K: "K",
+      C: "C",
+      R: "R",
+      F: "F"
+    });
+    plot = d3.select(".explanation").call(temperatures);
+    eq = d3.selectAll(".equation").call(fn);
+    return temperatures.dispatch.on("update", function(replacements) {
+      var k, v;
+      for (k in replacements) {
+        v = replacements[k];
+        replacements[k] = v.toFixed(2);
+      }
+      return eq.call(fn.replacements(replacements));
+    });
   });
 
 }).call(this);
