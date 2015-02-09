@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <style>@import "//cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.1.1/gh-fork-ribbon.min.css";
+h1,
+h2 {
+  text-align: center;
+}
+.screenshots {
+  display: flex;
+}
+.screenshots a {
+  flex: auto;
+  height: 300px;
+  width: 33vw;
+  background-size: cover;
+}
+
+    </style>
+    <script type="text/x-mathjax-config">(function() {
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    },
+    TeX: {
+      extensions: ["color.js"]
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook("End", function() {
+    if (!!window.mathjax) {
+      return window.mathjax.init(MathJax);
+    }
+  });
+
+}).call(this);
+
+    </script>
+    <script src="./bower_components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  </head>
+  <body>
+    <div class="github-fork-ribbon-wrapper right">
+      <div class="github-fork-ribbon"><a href="https://github.com/nrbgt/ir-primer">Fork me on GitHub</a></div>
+    </div>
+    <h1>An Infrared Primer</h1>
+    <blockquote>
+      Visual explorations of key concepts in the infrared spectrum
+      
+    </blockquote>
+    <div class="screenshots"><a href="./planck.html" style="background-image: url('screenshots/planck.png')"></a><a href="./temperatures.html" style="background-image: url('screenshots/temperatures.png')"></a>
+    </div>
+    <h2>IPython Notebook Integration</h2>
+    <div class="screenshots"><a href="./An IR Primer.slides.local.html" style="background-image: url('screenshots/An IR Primer.slides.local.png')"></a>
+    </div>
+  </body>
+</html>

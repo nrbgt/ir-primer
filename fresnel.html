@@ -10,6 +10,15 @@
   MathJax.Hub.Config({
     tex2jax: {
       inlineMath: [['$', '$'], ['\\(', '\\)']]
+    },
+    TeX: {
+      extensions: ["color.js"]
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook("End", function() {
+    if (!!window.mathjax) {
+      return window.mathjax.init(MathJax);
     }
   });
 
