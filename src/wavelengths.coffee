@@ -7,6 +7,7 @@ define ["./explanation.js"], (Exp)->
     left: 120
     right: 120
     bottom: 90
+    middle: 20
   sliderPadding =
     top: 80
     left: 10
@@ -16,12 +17,21 @@ define ["./explanation.js"], (Exp)->
     solution: 140
 
   domains =
-    x: [0, 12]
+    x: [0.1, 100]
     y: [
-      [0, 1.6e4]
-      [0.1, 10]
-      [1e-20, 1e-18]
+      [0, 1e5]
+      [0, 3000]
+      [0.01, 13]
+      [1e-21, 1e-17]
     ]
+
+
+  converters = [
+    Exp.laws.Wavenumber
+    Exp.laws.Frequency
+    Exp.laws.EnergyEV
+    Exp.laws.EnergyJ
+  ]
 
   expwn = Exp.scientificNotation
 
@@ -30,25 +40,33 @@ define ["./explanation.js"], (Exp)->
     d3 = _d3
 
     scales =
-      x: d3.scale.linear().domain domains.x
+      x: d3.scale.log().domain domains.x
       y: [
         d3.scale.linear().domain domains.y[0]
-        d3.scale.log().domain domains.y[1]
+        d3.scale.linear().domain domains.y[1]
         d3.scale.log().domain domains.y[2]
+        d3.scale.log().domain domains.y[3]
       ]
+      color: d3.scale.ordinal().range ["green", "purple", "red", "blue"]
+
 
     axes =
       x: d3.svg.axis().scale(scales.x).orient 'bottom'
       y: [
         d3.svg.axis().scale(scales.y[0]).orient 'left'
-        d3.svg.axis().scale(scales.y[1]).orient 'left'
-        d3.svg.axis().scale(scales.y[2]).orient 'right'
+        d3.svg.axis().scale(scales.y[1]).orient 'right'
+        d3.svg.axis().scale(scales.y[2]).orient 'left'
+        d3.svg.axis().scale(scales.y[3]).orient 'right'
       ]
 
     seriesPath = (y)->
       d3.svg.line()
         .x (d) -> scales.x d[0]
         .y (d) -> y d[1]
+
+    wavelengths = (i for i in [0.1..1.99] by 0.01)
+      .concat (i for i in [2..19.5] by 0.5)
+      .concat (i for i in [20..100] by 1)
 
     plotSeries = (series) ->
       # generate an svg path from a series
@@ -65,6 +83,14 @@ define ["./explanation.js"], (Exp)->
             fn = seriesPath scales.y[d.scaleIdx]
             fn d.points
 
+
+    makeSeries = (fn, i)->
+      scaleIdx: i
+      points: wavelengths.map (wavelength)->[
+        wavelength
+        fn wavelength
+      ]
+
     dispatch = d3.dispatch "update"
 
     api = (selection) ->
@@ -73,6 +99,8 @@ define ["./explanation.js"], (Exp)->
         wavelengths: true
 
       WAVELENGTH = 0
+
+      references = converters.map makeSeries
 
       api.explore = ->
         [mouseX, mouseY] = d3.mouse @
@@ -83,53 +111,142 @@ define ["./explanation.js"], (Exp)->
         api.update()
 
       api.update = ->
+        scaleSolutions = converters.map (convert)->
+          [
+            WAVELENGTH
+            convert WAVELENGTH
+          ]
+
+        wavelengthLabel.attr transform: "translate(#{ scales.x WAVELENGTH }, 20)"
+          .select "text"
+          .text "λ: #{ WAVELENGTH.toFixed(2) }"
+
+        plots.selectAll ".solution.interactive"
+          .data scaleSolutions
+          .call (solutionLabel) ->
+            solutionLabel.enter()
+              .append "g"
+              .classed solution: true, interactive: true
+              .append "text"
+              .style
+                fill: (d, i) -> scales.color i
+              .attr
+                "text-anchor": (d, i) ->
+                  if i % 2 == 0
+                    "start"
+                  else
+                    "end"
+          .attr
+            transform: (d, i) ->
+              if i % 2 == 0
+                "translate(#{padding.left + 5}, #{scales.y[i] d[1]})"
+              else
+                "translate(#{scales.x.range()[1] - 5}, #{scales.y[i] d[1]})"
+
+          .select "text"
+            .text (d, i) ->
+              if i == 3
+                expwn d[1]
+              else
+                "#{d[1].toFixed 2}"
+
+        solutions.selectAll ".solution.reference"
+          .data scaleSolutions
+          .call (solution) ->
+            solution.enter()
+              .append "g"
+              .classed solution: true, reference: true
+              .call (solution) ->
+                solution.append "circle"
+                  .attr r: 5
+                  .style
+                    stroke: (d, i) -> scales.color i
+                    fill: (d, i) -> scales.color i
+          .attr transform: (d, i) ->
+            "translate(#{scales.x d[0]}, #{scales.y[i] d[1]} )"
+
       api.resize = ->
         # do things based on window resize
         WIDTH = selection.node().clientWidth
         HEIGHT = selection.node().clientHeight
+        MID = HEIGHT / 2
 
         scales.x.range [padding.left, WIDTH - padding.right]
-        scales.y[0].range [HEIGHT / 2, padding.top]
-        scales.y[1].range [HEIGHT / 2, padding.top]
-        scales.y[2].range [HEIGHT / 2, padding.top]
+
+        scales.y[0].range [MID, padding.top]
+        scales.y[1].range [MID, padding.top]
+
+        scales.y[2].range [HEIGHT - padding.bottom, MID + padding.middle]
+        scales.y[3].range [HEIGHT - padding.bottom, MID + padding.middle]
 
         svg.attr width: WIDTH, height: HEIGHT
 
         plotsBg.attr width: WIDTH - padding.right, height: HEIGHT
 
+
+        spectrum.attr
+          x: scales.x 0.380
+          y: padding.top
+          width: (scales.x 0.750) - (scales.x 0.380)
+          height: HEIGHT - padding.top - padding.bottom
+
+
         # TODO: need two of these
         clip.attr
           width: WIDTH,
-          height: scales.y[0].range()[0],
+          height: HEIGHT - padding.top - padding.bottom,
           x: 0
+          y: padding.top
 
-        el_xAxis.attr transform: "translate(0, #{ HEIGHT / 2 })"
+        el_xAxis.attr
+            transform: "translate(0, #{ HEIGHT - padding.bottom })"
           .call axes.x
-
-        el_y0Axis.attr transform: "translate(#{ padding.left }, 0)"
-          .call axes.y[0]
-
-        el_y1Axis.attr transform: "translate(#{ padding.left }, #{ HEIGHT / 2})"
-          .call axes.y[1]
           .selectAll "text"
           .text ->
-            parseFloat this.textContent unless not this.textContent
+            parseFloat @textContent unless not @textContent
 
 
-        el_y2Axis.attr transform: "translate(#{ WIDTH - padding.right }, #{ HEIGHT / 2})"
+
+        el_y0Axis.attr
+            transform: "translate(#{ padding.left }, 0)"
+          .call axes.y[0]
+
+        el_y1Axis.attr
+            transform: "translate(#{ WIDTH - padding.right }, 0)"
+          .call axes.y[1]
+
+        el_y2Axis.attr
+            transform: "translate(#{ padding.left }, 0)"
           .call axes.y[2]
-          .text -> expwn this.textContent
+
+        el_y3Axis.attr
+            transform: "translate(#{ WIDTH - padding.right }, 0)"
+        .call axes.y[3]
+        .selectAll "text"
+          .text ->
+            if @textContent[0] == "1"
+              @textContent
+            else
+              ""
 
 
         xLabel.attr
-          transform: "translate(#{ [ WIDTH / 2, HEIGHT / 2] })"
+          transform: "translate(#{ [ WIDTH / 2, HEIGHT - 30] })"
+
         y0Label.attr
           transform: "translate(10, #{ HEIGHT / 4 }) rotate(-90)"
         y1Label.attr
-          transform: "translate(10, #{ HEIGHT * (3/4) }) rotate(-90)"
-        y2Label.attr
-          transform: "translate(#{ WIDTH - 10 }, #{ HEIGHT/3/4 }) rotate(90)"
+          transform: "translate(#{ WIDTH - 10 }, #{ HEIGHT / 4 }) rotate(90)"
 
+        y2Label.attr
+          transform: "translate(10, #{ HEIGHT * (3/4) }) rotate(-90)"
+        y3Label.attr
+          transform: "translate(#{ WIDTH - 10 }, #{ HEIGHT * (3/4) }) rotate(90)"
+
+
+        plots.selectAll '.series'
+          .data references
+          .call plotSeries
 
         api.update()
 
@@ -140,16 +257,23 @@ define ["./explanation.js"], (Exp)->
             .append "svg"
             .classed plot: true
 
-          svg.append "defs"
-            .append "clipPath"
-              .classed "wavelengths-path": true
-              .attr id: "wavelengthsPath"
-              .append "rect"
+          defs = svg.append "defs"
+
+          defs.call Exp.defs.spectrum
+
+          defs.append "clipPath"
+            .classed "wavelengths-path": true
+            .attr id: "wavelengthsPath"
+            .append "rect"
 
           svg.append "g"
             .classed plots: true
             .attr "clip-path": "url(#wavelengthsPath)"
             .call (plots) ->
+              plots.append "rect"
+                .classed spectrum: true
+                .style fill: "url(#spectrumGradient)"
+
               plots.append "rect"
                 .classed bg: true
                 .on mousemove: api.explore
@@ -170,6 +294,9 @@ define ["./explanation.js"], (Exp)->
             .classed axis: true, y2: true
 
           svg.append "g"
+            .classed axis: true, y3: true
+
+          svg.append "g"
             .classed label: true, x: true
             .append "text"
             .attr "text-anchor": "middle", dy: ".71em", y: -10
@@ -180,10 +307,6 @@ define ["./explanation.js"], (Exp)->
               xLabel.append "tspan"
                 .classed unit: true
                 .text " [µm]"
-
-              xLabel.append "tspan"
-                .classed variable: true
-                .text " λ"
 
           svg.append "g"
             .classed label: true, y0: true
@@ -197,18 +320,17 @@ define ["./explanation.js"], (Exp)->
                 .classed unit: true
                 .text " [cm⁻¹]"
 
-
           svg.append "g"
             .classed label: true, y1: true
             .append "text"
             .attr "text-anchor": "middle", dy: ".71em"
             .call (yLabel) ->
               yLabel.append "tspan"
-                .text "Energy "
+                .text "Frequency "
 
               yLabel.append "tspan"
                 .classed unit: true
-                .text " [eV]"
+                .text " [THz]"
 
           svg.append "g"
             .classed label: true, y2: true
@@ -220,7 +342,24 @@ define ["./explanation.js"], (Exp)->
 
               yLabel.append "tspan"
                 .classed unit: true
+                .text " [eV]"
+
+          svg.append "g"
+            .classed label: true, y3: true
+            .append "text"
+            .attr "text-anchor": "middle", dy: ".71em"
+            .call (yLabel) ->
+              yLabel.append "tspan"
+                .text "Energy "
+
+              yLabel.append "tspan"
+                .classed unit: true
                 .text " [J]"
+
+          svg.append "g"
+            .classed wavelength: true, interactive: true
+            .attr "text-anchor": "middle"
+            .append "text"
 
       plots = svg.select ".plots"
       solutions = plots.select ".solutions"
@@ -231,10 +370,15 @@ define ["./explanation.js"], (Exp)->
       el_y0Axis = svg.select ".axis.y0"
       el_y1Axis = svg.select ".axis.y1"
       el_y2Axis = svg.select ".axis.y2"
+      el_y3Axis = svg.select ".axis.y3"
       xLabel = svg.select ".label.x text"
       y0Label = svg.select ".label.y0 text"
       y1Label = svg.select ".label.y1 text"
       y2Label = svg.select ".label.y2 text"
+      y3Label = svg.select ".label.y3 text"
+      wavelengthLabel = svg.select ".wavelength.interactive"
+      spectrum = svg.select ".spectrum"
+
 
       # listen for window resize
       # it is still the job of the owner of `selection` to update)

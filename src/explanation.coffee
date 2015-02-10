@@ -33,10 +33,10 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
         .toNumber "degR"
 
     Frequency: (wavelength) ->
-      cms() / wavelength / 1e7
+      C.cms() / wavelength / 1e6
 
     Wavenumber: (wavelength) ->
-      1e7 / wavelength
+      1e4 / wavelength
 
     EnergyEV: (wavelength) ->
       C.hevs() * C.cms() * 1e6 / wavelength

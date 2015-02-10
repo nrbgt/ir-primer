@@ -1,6 +1,7 @@
 explanations = [
   "planck"
   "temperatures"
+  "wavelengths"
   "An IR Primer.slides.local"
 ]
 

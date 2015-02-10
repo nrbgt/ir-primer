@@ -20,7 +20,11 @@ define ["./explanation.js"], (Exp)->
     y0: [-500, 2000]
     y1: [-1000, 4000]
 
-  converters = [Exp.laws.Celsius, Exp.laws.Fahrenheit, Exp.laws.Rankine]
+  converters = [
+    Exp.laws.Celsius
+    Exp.laws.Fahrenheit
+    Exp.laws.Rankine
+  ]
 
   references = converters.map (convert, i) ->
     scaleIdx: i
@@ -78,7 +82,6 @@ define ["./explanation.js"], (Exp)->
           domains.x[1]
           Math.max scales.x.invert(mouseX), domains.x[0]
         )
-
         api.update()
 
       api.update = ->
