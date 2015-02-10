@@ -9,6 +9,7 @@
     "stylus": "./node_modules/.bin/stylus -w ./src/*.styl --out ./dist",
     "coffee": "./node_modules/.bin/coffee -w -o ./dist --compile ./src/*.coffee",
     "serve": "./node_modules/.bin/live-server dist",
+    "screenshots": "casperjs test src/test/screenshots.coffee",
     "live": "./bin/npm_watch_multiple.sh jade stylus coffee serve"
   },
   "author": "",

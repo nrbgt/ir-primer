@@ -1,0 +1,43 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="utf-8")
+
+    style: :stylus
+      @import  "//cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.1.1/gh-fork-ribbon.min.css"
+      h1, h2
+        text-align center
+      
+      .screenshots
+        display flex
+
+        a
+          flex auto
+          height 300px
+          width 33vw
+          background-size cover
+      
+    include ./lib/mathjax.jade
+    
+  body
+    .github-fork-ribbon-wrapper.right
+      .github-fork-ribbon
+        a(href="https://github.com/nrbgt/ir-primer")
+          | Fork me on GitHub
+
+    h1 An Infrared Primer
+    blockquote.
+      Visual explorations of key concepts in the infrared spectrum
+    
+    .screenshots
+      each exp in ["temperatures", "wavelengths", "planck", "refraction", "fresnel", "temperature_density"]
+        a(href="./" + exp + ".html"
+          style="background-image: url('screenshots/" + exp+".png')")
+    
+    h2 IPython Notebook Integration
+
+    .screenshots
+      each exp in ["An IR Primer.slides.local"]
+        a(href="./" + exp + ".html"
+          style="background-image: url('screenshots/" + exp+".png')")
+    

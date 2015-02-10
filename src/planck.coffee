@@ -178,7 +178,9 @@ define ["./explanation.js"], (Exp)->
               .call (solution) ->
                 solution.append "circle"
                   .attr r: 5
-                  .style stroke: (d) -> temperatureColor d.series
+                  .style
+                    stroke: (d) -> temperatureColor d.series
+                    fill: (d) -> temperatureColor d.series
           .attr transform: (d) ->
             "translate(#{scales.x d.solution[0]}, #{scales.y d.solution[1]} )"
 
@@ -196,6 +198,13 @@ define ["./explanation.js"], (Exp)->
         svg.attr width: WIDTH, height: HEIGHT
 
         plotsBg.attr width: WIDTH - padding.right - sidebarWidth, height: HEIGHT
+
+        spectrum.attr
+          x: scales.x 0.380
+          y: scales.y.range()[1]
+          width: (scales.x 0.750) - (scales.x 0.380)
+          height: HEIGHT
+
         clip.attr
           width: scales.x.range().slice(-1),
           height: scales.y.range()[0],
@@ -241,16 +250,23 @@ define ["./explanation.js"], (Exp)->
             .append "svg"
             .classed plot: true
 
-          svg.append "defs"
-            .append "clipPath"
-              .classed "planck-path": true
-              .attr id: "planckPath"
-              .append "rect"
+          defs = svg.append "defs"
+
+          defs.call Exp.defs.spectrum
+
+          defs.append "clipPath"
+            .classed "planck-path": true
+            .attr id: "planckPath"
+            .append "rect"
 
           svg.append "g"
             .classed plots: true
             .attr "clip-path": "url(#planckPath)"
             .call (plots) ->
+              plots.append "rect"
+                .classed spectrum: true
+                .style fill: "url(#spectrumGradient)"
+
               plots.append "rect"
                 .classed bg: true
                 .on "mousemove.planck": api.explore
@@ -268,6 +284,7 @@ define ["./explanation.js"], (Exp)->
                     HOVERWIEN = false
                     api.update()
                 .append "path"
+
 
           svg.append "g"
             .classed axis: true, x: true
@@ -325,6 +342,7 @@ define ["./explanation.js"], (Exp)->
       xLabel = svg.select ".label.x text"
       wavelengthLabel = svg.select ".wavelength.interactive"
       wienSeries = plots.select ".wien"
+      spectrum = svg.select ".spectrum"
 
 
       slider = svg.selectAll ".slider"

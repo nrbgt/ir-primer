@@ -24,15 +24,17 @@ This will generate an `.html` file for each of the explanations, which has all s
 
 ## IPython/Jupyter Notebook integration
 A small python wrapper around the built javascript/css allows all the explanations to be embedded inside an [IPython Notebook](http://ipython.org/notebook.html), generally one per cell.
+
 ```python
-from irprimer import fresnel, planck, slides
-fresnel()
-...
-planck()
+from irprimer import Temperatures, Planck
+Temperatures()
+Planck()
 ```
 
-Additionally provided is a function for generating a self-contained [Reveal.js](http://lab.hakim.se/reveal-js/) slideshow. Put this in another `skip` slide.
+Additionally provided is a function for generating a self-contained [Reveal.js](http://lab.hakim.se/reveal-js/) slideshow. Put this in a `skip` slide at the end.
+
 ```python
+from irprimer import slides
 slides()
 ```
 
