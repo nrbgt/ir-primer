@@ -1,4 +1,10 @@
 define ["./bower_components/mathjs/dist/math.js"], (math)->
+  iferr = (result, fn) ->
+    try
+      result = fn()
+    catch Err
+    result
+
   C =
     boltzman1: -> 3.74e8
     boltzman2: -> 1.44e4
@@ -43,6 +49,44 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
 
     EnergyJ: (wavelength) ->
       C.hjs() * C.cms() * 1e6 / wavelength
+
+    Fresnel: (incident_angle, incident_angle_n1=60, index_n1=1, index_n2=1.5) ->
+      W = {}
+
+      brewster = W.brewster = math.unit math.atan(index_n2 / index_n1), "rad"
+        .toNumber "deg"
+
+      critical = W.critical = iferr 90,
+        -> math.unit(math.asin(index_n2 / index_n1), "rad").toNumber "deg"
+
+      incident_rad = math.unit(incident_angle, "deg").toNumber "rad"
+
+      cos_incident = W.cos_incident = math.cos incident_rad
+      sin_incident = W.sin_incident = math.sin incident_rad
+
+      rs_numerator = W.rs_numerator = iferr 1, ->
+        index_n1 * cos_incident - index_n2 * Math.sqrt(
+          1 - (index_n1 / index_n2 * sin_incident) ** 2
+        )
+      rs_denominator = W.rs_denominator = iferr 1, ->
+        index_n1 * cos_incident + index_n2 * Math.sqrt(
+          1 - (index_n1 / index_n2 * sin_incident) ** 2
+        )
+      rs = W.rs = (rs_numerator / rs_denominator) ** 2
+
+      rp_numerator = W.rp_numerator = iferr 1, ->
+        Math.sqrt(
+          1 - (index_n1 / index_n2 * sin_incident) ** 2
+        ) - index_n2 * cos_incident
+      rp_denominator = W.rp_denominator = iferr 1, ->
+        Math.sqrt(
+          1 - (index_n1 / index_n2 * sin_incident) ** 2
+        ) + index_n2 * cos_incident
+      rp = W.rp = (rp_numerator / rp_denominator) ** 2
+
+      rtotal = W.total = math.mean rs, rp
+
+      W
 
   spectrumOffset = 0.0135
   spectrumColors = [

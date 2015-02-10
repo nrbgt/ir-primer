@@ -13,18 +13,19 @@ html(lang="en")
   body
     .titles
       .title
-        h1 Fresnel Functions
+        h1 Refraction
         blockquote
           :markdown
             TBD
         .equation.
+    
     .explanation
 
     script(src="./bower_components/requirejs/require.js")
     script
       :coffee
-        require ["./bower_components/d3/d3.js", "./fresnel.js"],
-          (d3, Fresnel) ->
-            fresnel = Fresnel d3
+        require ["./bower_components/d3/d3.js", "./refraction.js"],
+          (d3, Refraction) ->
+            refraction = Refraction d3
             plot = d3.select ".explanation"
-              .call fresnel
+              .call refraction

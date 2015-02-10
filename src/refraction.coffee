@@ -1,13 +1,11 @@
-define ["./explanation.js"], (Exp)->
+define [], ->
   d3 = null
 
-  Fresnel = (_d3)->
+  Refraction = (_d3)->
     d3 = _d3
 
     api = (selection) ->
-      selection.classed fresnel: true, explanation: true
-      Exp.laws.Fresnel 60
-      Exp.laws.Fresnel 23
+      selection.classed refraction: true, explanation: true
 
     api.update = ->
       # do things based on user interaction
@@ -20,7 +18,7 @@ define ["./explanation.js"], (Exp)->
     # listen for window resize
     # it is still the job of the owner of `selection` to update)
     d3.select window
-      .on "resize.fresnel": api.resize
+      .on "resize.refraction": api.resize
 
     return api
 
