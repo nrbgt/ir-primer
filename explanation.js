@@ -42,10 +42,10 @@
         return math.unit(kelvin, "K").toNumber("degR");
       },
       Frequency: function(wavelength) {
-        return cms() / wavelength / 1e7;
+        return C.cms() / wavelength / 1e6;
       },
       Wavenumber: function(wavelength) {
-        return 1e7 / wavelength;
+        return 1e4 / wavelength;
       },
       EnergyEV: function(wavelength) {
         return C.hevs() * C.cms() * 1e6 / wavelength;
