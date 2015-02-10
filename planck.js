@@ -107,7 +107,7 @@
         y: d3.svg.axis().scale(scales.y).orient('left')
       };
       api = function(selection) {
-        var clip, defs, el_xAxis, el_yAxis, handleLabel, handleSolution, plots, plotsBg, slide, slideHandle, slider, sliderLabel, sliderReferences, solutions, svg, wavelengthLabel, wienSeries, xLabel, yLabel;
+        var clip, defs, el_xAxis, el_yAxis, handleLabel, handleSolution, plots, plotsBg, slide, slideHandle, slider, sliderLabel, sliderReferences, solutions, spectrum, svg, wavelengthLabel, wienSeries, xLabel, yLabel;
         selection.classed({
           planck: true,
           explanation: true
@@ -178,6 +178,9 @@
               }).style({
                 stroke: function(d) {
                   return temperatureColor(d.series);
+                },
+                fill: function(d) {
+                  return temperatureColor(d.series);
                 }
               });
             });
@@ -200,6 +203,12 @@
           });
           plotsBg.attr({
             width: WIDTH - padding.right - sidebarWidth,
+            height: HEIGHT
+          });
+          spectrum.attr({
+            x: scales.x(0.380),
+            y: scales.y.range()[1],
+            width: (scales.x(0.750)) - (scales.x(0.380)),
             height: HEIGHT
           });
           clip.attr({
@@ -244,10 +253,13 @@
           return api.update();
         };
         svg = selection.selectAll(".plot").data([1]).call(function(svg) {
+          var defs;
           svg = svg.enter().append("svg").classed({
             plot: true
           });
-          svg.append("defs").append("clipPath").classed({
+          defs = svg.append("defs");
+          defs.call(Exp.defs.spectrum);
+          defs.append("clipPath").classed({
             "planck-path": true
           }).attr({
             id: "planckPath"
@@ -257,6 +269,11 @@
           }).attr({
             "clip-path": "url(#planckPath)"
           }).call(function(plots) {
+            plots.append("rect").classed({
+              spectrum: true
+            }).style({
+              fill: "url(#spectrumGradient)"
+            });
             plots.append("rect").classed({
               bg: true
             }).on({
@@ -335,6 +352,7 @@
         xLabel = svg.select(".label.x text");
         wavelengthLabel = svg.select(".wavelength.interactive");
         wienSeries = plots.select(".wien");
+        spectrum = svg.select(".spectrum");
         slider = svg.selectAll(".slider").data([1]).call(function(slider) {
           slider = slider.enter().append("g").classed({
             slider: true
