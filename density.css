@@ -1,0 +1,56 @@
+.explanation {
+  overflow: hidden;
+  font-family: MathJax_Main;
+}
+.explanation tspan.variable {
+  font-style: italic;
+}
+.explanation .slider {
+  margin-top: 10px;
+}
+.explanation .slider .handle text {
+  font-weight: bold;
+}
+.explanation .slider .handle text.temperature {
+  fill: #fff;
+}
+.explanation .slider .handle circle {
+  fill: transparent;
+  stroke: #000;
+  stroke-width: 2px;
+}
+.explanation svg .label {
+  font-size: 32px;
+}
+.explanation svg .label .unit {
+  fill: #777;
+}
+.explanation svg .axis line,
+.explanation svg .axis path {
+  fill: none;
+  stroke: #999;
+  shape-rendering: crispEdges;
+}
+.explanation svg .axis text {
+  font-size: 16px;
+  text-anchor: middle;
+}
+.explanation svg .interactive path,
+.explanation svg .interactive circle {
+  stroke: #000 !important;
+  stroke-width: 4px;
+}
+.explanation svg .plots path {
+  fill: none;
+  stroke-width: 2px;
+}
+.explanation svg .plots .bg {
+  fill: transparent;
+}
+.explanation svg .plots .solution {
+  fill: none;
+}
+.explanation svg .plots .wien path {
+  stroke-width: 6px !important;
+  stroke: #900;
+}

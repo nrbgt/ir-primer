@@ -30,7 +30,7 @@
   <body>
     <div class="titles">
       <div class="title">
-        <h1>Fresnel Functions</h1>
+        <h1>Refraction</h1>
         <blockquote><p>TBD</p>
 
         </blockquote>
@@ -40,10 +40,10 @@
     <div class="explanation"></div>
     <script src="./bower_components/requirejs/require.js"></script>
     <script>(function() {
-  require(["./bower_components/d3/d3.js", "./fresnel.js"], function(d3, Fresnel) {
-    var fresnel, plot;
-    fresnel = Fresnel(d3);
-    return plot = d3.select(".explanation").call(fresnel);
+  require(["./bower_components/d3/d3.js", "./refraction.js"], function(d3, Refraction) {
+    var plot, refraction;
+    refraction = Refraction(d3);
+    return plot = d3.select(".explanation").call(refraction);
   });
 
 }).call(this);

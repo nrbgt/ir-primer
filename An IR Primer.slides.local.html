@@ -8743,6 +8743,17 @@ ul.breadcrumb span {
 .list_header > div input,
 .list_item > div input {
   margin-right: 7px;
+  margin-left: 14px;
+  vertical-align: baseline;
+  line-height: 22px;
+  position: relative;
+  top: -1px;
+}
+.list_header > div .item_link,
+.list_item > div .item_link {
+  margin-left: -1px;
+  vertical-align: baseline;
+  line-height: 22px;
 }
 .new-file input[type=checkbox] {
   visibility: hidden;
@@ -8755,6 +8766,9 @@ ul.breadcrumb span {
   font-size: 14px;
   color: #5e5e5e;
   margin-right: 7px;
+  margin-left: 7px;
+  line-height: 22px;
+  vertical-align: baseline;
 }
 .item_buttons {
   padding-top: 4px;
@@ -8794,11 +8808,24 @@ input.engine_num_input {
 .highlight_text {
   color: blue;
 }
+#project_name {
+  display: inline-block;
+  padding-left: 7px;
+  margin-left: -2px;
+}
 #project_name > .breadcrumb {
   padding: 0px;
   margin-bottom: 0px;
   background-color: transparent;
   font-weight: bold;
+}
+#tree-selector {
+  display: inline-block;
+  padding-right: 0px;
+}
+#tree-selector input[type=checkbox] {
+  margin-left: 7px;
+  vertical-align: baseline;
 }
 .tab-content .row {
   margin-left: 0px;
@@ -8829,6 +8856,8 @@ input.engine_num_input {
   -moz-osx-font-smoothing: grayscale;
   transform: translate(0, 0);
   content: "\f02d";
+  position: relative;
+  top: -1px;
 }
 .notebook_icon:before.pull-left {
   margin-right: .3em;
@@ -8845,6 +8874,8 @@ input.engine_num_input {
   -moz-osx-font-smoothing: grayscale;
   transform: translate(0, 0);
   content: "\f02d";
+  position: relative;
+  top: -1px;
   color: #5cb85c;
 }
 .running_notebook_icon:before.pull-left {
@@ -8862,6 +8893,8 @@ input.engine_num_input {
   -moz-osx-font-smoothing: grayscale;
   transform: translate(0, 0);
   content: "\f016";
+  position: relative;
+  top: -2px;
 }
 .file_icon:before.pull-left {
   margin-right: .3em;
@@ -8965,6 +8998,7 @@ ul#new-menu {
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
   width: 20px;
 }
 .dirty-indicator.pull-left {
@@ -8980,6 +9014,7 @@ ul#new-menu {
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
   width: 20px;
 }
 .dirty-indicator-dirty.pull-left {
@@ -8995,6 +9030,7 @@ ul#new-menu {
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
   width: 20px;
 }
 .dirty-indicator-clean.pull-left {
@@ -9010,6 +9046,7 @@ ul#new-menu {
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
   content: "\f00c";
 }
 .dirty-indicator-clean:before.pull-left {
@@ -10361,6 +10398,7 @@ h6:hover .anchor-link {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  height: 100%;
 }
 div#notebook_panel {
   margin: 0px;
@@ -10368,6 +10406,7 @@ div#notebook_panel {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  height: 100%;
 }
 #notebook {
   font-size: 14px;
@@ -10382,6 +10421,7 @@ div#notebook_panel {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  min-height: 100%;
 }
 @media not print {
   #notebook-container {
@@ -10710,6 +10750,10 @@ ul#help_menu li a i {
   z-index: 10;
   text-align: center;
   width: auto;
+}
+.modal_indicator:before {
+  width: 1.28571429em;
+  text-align: center;
 }
 .edit_mode .modal_indicator:before {
   display: inline-block;
@@ -11525,7 +11569,7 @@ div.output_prompt {
     
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">display</span>
@@ -11573,7 +11617,7 @@ div.output_prompt {
     
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">Temperatures</span><span class="p">()</span>
@@ -11587,12 +11631,12 @@ div.output_prompt {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[7]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[15]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
             <style>@import url("./temperatures.css");</style>
-            <div id="temperatures-7370840126475908"></div>
+            <div id="temperatures-6787543440782947"></div>
             <script>
                 require(
                     [
@@ -11602,7 +11646,7 @@ div.output_prompt {
                         "jquery"
                     ],
                     function(Explanation, Loader, d3, $){{
-                        Loader("temperatures-7370840126475908", Explanation, d3, $);
+                        Loader("temperatures-6787543440782947", Explanation, d3, $);
                     }}
                 );
             </script>
@@ -11651,7 +11695,7 @@ $$
     
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">Planck</span><span class="p">()</span>
@@ -11665,12 +11709,12 @@ $$
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[8]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[16]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
             <style>@import url("./planck.css");</style>
-            <div id="planck-9992214843878819"></div>
+            <div id="planck-6796634435709935"></div>
             <script>
                 require(
                     [
@@ -11680,7 +11724,7 @@ $$
                         "jquery"
                     ],
                     function(Explanation, Loader, d3, $){{
-                        Loader("planck-9992214843878819", Explanation, d3, $);
+                        Loader("planck-6796634435709935", Explanation, d3, $);
                     }}
                 );
             </script>
@@ -11732,7 +11776,7 @@ $$
     
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">slides</span><span class="p">()</span>

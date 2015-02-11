@@ -401,8 +401,7 @@
             handle: true
           }).call(function(slideHandle) {
             slideHandle.call(slide);
-            slideHandle.append("circle").attr(sliderCircle);
-            return "slideHandle.append \"text\"\n  .classed temperature: true\n  .attr dy: \".35em\", x: sliderCircle.cx, \"text-anchor\": \"middle\"\nslideHandle.append \"text\"\n  .classed solution: true\n  .attr \"text-anchor\": \"end\", dy: \".35em\", dx: -5";
+            return slideHandle.append("circle").attr(sliderCircle);
           });
         });
         sliderReferences = slider.selectAll(".reference");
