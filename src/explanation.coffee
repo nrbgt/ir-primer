@@ -84,7 +84,7 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
         ) + index_n2 * cos_incident
       rp = W.rp = (rp_numerator / rp_denominator) ** 2
 
-      rtotal = W.total = math.mean rs, rp
+      rtotal = W.rtotal = math.mean rs, rp
 
       W
 

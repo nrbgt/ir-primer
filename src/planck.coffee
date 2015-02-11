@@ -396,14 +396,6 @@ define ["./explanation.js"], (Exp)->
               slideHandle.call slide
               slideHandle.append "circle"
                 .attr sliderCircle
-              """
-              slideHandle.append "text"
-                .classed temperature: true
-                .attr dy: ".35em", x: sliderCircle.cx, "text-anchor": "middle"
-              slideHandle.append "text"
-                .classed solution: true
-                .attr "text-anchor": "end", dy: ".35em", dx: -5
-              """
 
       sliderReferences = slider.selectAll ".reference"
       slideHandle = slider.select ".handle"
