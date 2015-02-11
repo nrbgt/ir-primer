@@ -6,14 +6,14 @@ define ["./explanation.js"], (Exp)->
     top: 40
     left: 120
     right: 120
-    bottom: 90
+    bottom: 200
 
   domains =
     x: [0, 90]
     y: [0, 1]
+    iofr: [0, 3]
 
-  angles = (i for i in [0..45] by 5)
-    .concat (i for i in [45..90] by 1)
+  angles = (i for i in [0..90] by 0.5)
 
   solutionParts = ["rs", "rp", "rtotal"]
 
@@ -24,10 +24,12 @@ define ["./explanation.js"], (Exp)->
       x: d3.scale.linear().domain domains.x
       y: d3.scale.linear().domain domains.y
       color: d3.scale.ordinal().range ["red", "blue", "green"]
+      iofr: d3.scale.linear().domain domains.iofr
 
     axes =
       x: d3.svg.axis().scale(scales.x).orient 'bottom'
       y: d3.svg.axis().scale(scales.y).orient 'left'
+      iofr: d3.svg.axis().scale(scales.iofr).orient 'bottom'
 
     seriesPath = d3.svg.line()
       .x (d) -> scales.x d[0]
@@ -44,16 +46,15 @@ define ["./explanation.js"], (Exp)->
             .style stroke: (d, i)-> scales.color i
 
         .selectAll "path"
-          .attr d: (d)->
-            seriesPath d.points
+          .data (d)-> [d.points]
+          .attr d: seriesPath
 
     api = (selection) ->
       selection.classed
         fresnel: true
         explanation: true
 
-      INDEX_N1 = 1.0
-      INDEX_N2 = 1.5
+      INDEX_N = [1.0, 1.5]
       INCIDENT_ANGLE_N1 = 60
       INCIDENT_ANGLE = 60
 
@@ -65,18 +66,23 @@ define ["./explanation.js"], (Exp)->
         )
         api.update()
 
+      api.exploreIofR = (d, i)->
+        [mouseX, mouseY] = d3.mouse @
+        INDEX_N[i] = scales.iofr.invert mouseX
+        api.update()
+
       api.update = ->
         serieses = (series: key, points: [] for key in solutionParts)
 
         angles.map (angle) ->
-          data = Exp.laws.Fresnel angle, INCIDENT_ANGLE_N1, INDEX_N1, INDEX_N2
+          data = Exp.laws.Fresnel angle, INCIDENT_ANGLE_N1, INDEX_N[0], INDEX_N[1]
           serieses.map (series) ->
             series.points.push [
               angle
               data[series.series]
             ]
 
-        scaleSolution = Exp.laws.Fresnel INCIDENT_ANGLE, INCIDENT_ANGLE_N1, INDEX_N1, INDEX_N2
+        scaleSolution = Exp.laws.Fresnel INCIDENT_ANGLE, INCIDENT_ANGLE_N1, INDEX_N[0], INDEX_N[1]
 
         scaleSolutions = solutionParts.map (part)->
           [
@@ -97,6 +103,43 @@ define ["./explanation.js"], (Exp)->
           .attr transform: (d, i) ->
             "translate(#{scales.x d[0]}, #{scales.y d[1]} )"
 
+        solutions.selectAll ".solution.interactive"
+          .data [
+            [INCIDENT_ANGLE, INCIDENT_ANGLE]
+            [INCIDENT_ANGLE, scaleSolutions[0][1]]
+            [INCIDENT_ANGLE, scaleSolutions[1][1]]
+            [INCIDENT_ANGLE, scaleSolutions[2][1]]
+          ]
+          .call (solutionLabel) ->
+            solutionLabel.enter()
+              .append "g"
+              .classed solution: true, interactive: true
+              .append "text"
+              .style
+                fill: (d, i) -> ["black", "red", "blue", "green"][i]
+              .attr
+                "text-anchor": (d, i) ->
+                  if i == 0
+                    "middle"
+                  else
+                    "end"
+          .attr
+            transform: (d, i) ->
+              if i == 0
+                "translate(#{scales.x d[0]}, #{ padding.top + 20})"
+              else
+                "translate(#{padding.left + 5}, #{scales.y d[1]})"
+          .select "text"
+            .text (d, i)->
+              "#{ ['Angle', 'Rs', 'Rp', 'Rtotal'][i] } = #{d[1].toFixed 2}"
+
+        iofrValues
+          .attr
+            transform: (d) ->
+              "translate(#{ scales.iofr INDEX_N[d-1] }, 0)"
+          .select "text"
+          .text (d) -> INDEX_N[d-1].toFixed 2
+
         plots.selectAll '.series'
           .data serieses
           .call plotSeries
@@ -110,14 +153,29 @@ define ["./explanation.js"], (Exp)->
 
         scales.x.range [padding.left, WIDTH - padding.right]
         scales.y.range [HEIGHT - padding.bottom, padding.top]
+        scales.iofr.range [padding.left, (WIDTH - padding.left - padding.right) / 2]
 
         svg.attr width: WIDTH, height: HEIGHT
 
+        plotsBg.attr
+          y: padding.top
+          width: WIDTH - padding.right
+          height: HEIGHT - padding.top
 
-        plotsBg.attr width: WIDTH - padding.right, height: HEIGHT
+
+        iofr.attr
+          transform: (d, i) ->
+            "translate(#{ i * (WIDTH / 2) }, #{ HEIGHT - 80 })"
+
+        iofrBg.attr
+          x: padding.left
+          width: scales.iofr.range()[1] - scales.iofr.range()[0]
+          height: 20
+
         clip.attr
           width: WIDTH,
           height: scales.y.range()[0],
+          y: padding.top
           x: 0
 
         el_xAxis.attr transform: "translate(0, #{ HEIGHT - padding.bottom })"
@@ -126,10 +184,16 @@ define ["./explanation.js"], (Exp)->
         el_yAxis.attr transform: "translate(#{ padding.left }, 0)"
           .call axes.y
 
+        el_iofrAxis
+          .call axes.iofr
+
         xLabel.attr
-          transform: "translate(#{ [WIDTH/2, HEIGHT - 50] })"
+          transform: "translate(#{ WIDTH/2 }, #{scales.y.range()[0] + 40})"
         yLabel.attr
           transform: "translate(10, #{ HEIGHT/2 }) rotate(-90)"
+
+        iofrLabel.attr
+          transform: "translate(#{ WIDTH/2 }, #{ HEIGHT - 20 })"
 
         api.update()
 
@@ -145,6 +209,35 @@ define ["./explanation.js"], (Exp)->
               .classed "fresnel-path": true
               .attr id: "fresnelPath"
               .append "rect"
+
+          svg.append "g"
+            .append "text"
+            .classed label: true, iofrLabel: true
+            .text "Index of Refraction"
+            .attr "text-anchor": "middle"
+
+          svg.selectAll ".iofr"
+            .data [1, 2]
+            .enter()
+            .append "g"
+            .classed iofr: true
+            .on "mousemove", api.exploreIofR
+            .call (iofr) ->
+              iofr.append "rect"
+                .classed bg: true
+              iofr.append "text"
+                .classed label: true
+                .text (d) -> "n#{ d }"
+                .attr x: padding.left - 20, "text-anchor": "end"
+
+              iofr.append "g"
+                .classed interactive: true
+                .append "text"
+                .attr
+                  dy: "-.35em"
+                  "text-anchor": "middle"
+              iofr.append "g"
+                .classed axis: true
 
           svg.append "g"
             .classed plots: true
@@ -180,20 +273,37 @@ define ["./explanation.js"], (Exp)->
             .append "text"
             .attr "text-anchor": "middle", dy: ".71em"
             .call (yLabel) ->
-              yLabel.append "tspan"
-                .text "Reflection"
+              spans =
 
-              yLabel.append "tspan"
-                .classed unit: true
-                .text " [Rs, Rp, Rtotal]"
+              yLabel.selectAll "tspan"
+                .data [
+                    ["Reflection", [], null]
+                    [" [", "unit", null]
+                    ["Rs ", null, scales.color 0]
+                    ["Rp ", null, scales.color 1]
+                    ["Rtotal", null, scales.color 2]
+                    ["]", "unit", null]
+                  ]
+                .enter()
+                .append "tspan"
+                .text (d)-> d[0]
+                .attr
+                  class: (d)-> d[1]
+                .style
+                  fill: (d)-> d[2]
 
       plots = svg.select ".plots"
+      iofr = svg.selectAll ".iofr"
       solutions = plots.select ".solutions"
       plotsBg = plots.select ".bg"
+      iofrBg = iofr.selectAll ".bg"
+      iofrLabel = svg.select ".iofrLabel"
+      iofrValues = iofr.selectAll ".interactive"
       defs = svg.select "defs"
       clip = defs.select ".fresnel-path rect"
       el_xAxis = svg.select ".axis.x"
       el_yAxis = svg.select ".axis.y"
+      el_iofrAxis = svg.selectAll ".iofr .axis"
       xLabel = svg.select ".label.x text"
       yLabel = svg.select ".label.y text"
 

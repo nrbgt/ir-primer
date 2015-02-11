@@ -13,7 +13,13 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
     hevs: -> 4.136e-015
     hjs: -> 6.63e-34
     cms: -> 3.00e+08
-
+    g0: -> 9.80665
+    M: -> 0.0289644
+    R: -> 8.31432
+    L: -> 0.0065
+    Tropopause: -> 11000
+    TK1: -> 288.15
+    TK2: -> 216.65
 
   laws =
     Planck: (temperature, wavelength) ->
@@ -86,6 +92,20 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
 
       rtotal = W.rtotal = math.mean rs, rp
 
+      W
+
+    Density: (elevation) ->
+      W = E: elevation
+
+      if elevation < C.Tropopause()
+        W.K = C.TK1() - C.L() * elevation
+        W.rP = (W.K / (W.K + C.L() * elevation)) **
+          (C.g0() * C.M() / C.R() / C.L())
+      else
+        W.K = C.TK2()
+        W.rP = Math.exp -C.g0() * C.M() * elevation / C.R() / W.K
+
+      W.rD = W.rP * W.K / C.TK1()
       W
 
   spectrumOffset = 0.0135

@@ -2,6 +2,9 @@ explanations = [
   "planck"
   "temperatures"
   "wavelengths"
+  "fresnel"
+  "refraction"
+  "density"
   "An IR Primer.slides.local"
 ]
 

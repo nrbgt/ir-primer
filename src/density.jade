@@ -1,0 +1,30 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="utf-8")
+
+    style: :stylus
+      @import "./density.css"
+      @import "./standalone.css"
+        
+    include ./lib/mathjax.jade
+
+
+  body
+    .titles
+      .title
+        h1 Temperature & Density
+        blockquote
+          :markdown
+            TBD
+        .equation.
+    .explanation
+
+    script(src="./bower_components/requirejs/require.js")
+    script
+      :coffee
+        require ["./bower_components/d3/d3.js", "./density.js"],
+          (d3, Density) ->
+            density = Density d3
+            plot = d3.select ".explanation"
+              .call density
