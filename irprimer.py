@@ -74,8 +74,22 @@ class Explanation(object):
             "name": self.name
         }
 
+
 class Planck(Explanation):
     name = "planck"
 
+
 class Temperatures(Explanation):
     name = "temperatures"
+
+
+class Density(Explanation):
+    name = "density"
+
+
+class Fresnel(Explanation):
+    name = "fresnel"
+
+
+class Wavelengths(Explanation):
+    name = "wavelengths"

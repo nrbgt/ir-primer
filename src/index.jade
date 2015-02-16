@@ -24,14 +24,10 @@ html(lang="en")
       Visual explorations of key concepts in the infrared spectrum
     
     .screenshots
-      each exp in ["temperatures", "wavelengths", "planck", "refraction", "fresnel", "density"]
+      each exp in ["temperatures", "wavelengths", "planck", "fresnel", "density"]
         a(href="./" + exp + ".html"
           style="background-image: url('screenshots/" + exp+".png')")
     
-    h2 IPython Notebook Integration
-
-    .screenshots
-      each exp in ["An IR Primer.slides.local"]
-        a(href="./" + exp + ".html"
-          style="background-image: url('screenshots/" + exp+".png')")
-    
+    h2 
+      a(href="./An IR Primer.slides.local.html") IPython Notebook Integration
+        

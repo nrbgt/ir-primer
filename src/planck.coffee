@@ -111,7 +111,7 @@ define ["./explanation.js"], (Exp)->
           api.update()
 
       api.explore = ->
-        [mouseX, mouseY] = d3.mouse @
+        [mouseX, mouseY] = d3.mouse svg.node()
         WAVELENGTH = scales.x.invert mouseX
 
         val = parseInt scales.slider.invert mouseY
