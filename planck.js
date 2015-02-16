@@ -120,7 +120,7 @@
         });
         api.explore = function() {
           var mouseX, mouseY, val, _ref;
-          _ref = d3.mouse(this), mouseX = _ref[0], mouseY = _ref[1];
+          _ref = d3.mouse(svg.node()), mouseX = _ref[0], mouseY = _ref[1];
           WAVELENGTH = scales.x.invert(mouseX);
           val = parseInt(scales.slider.invert(mouseY));
           TEMPERATURE = Math.max(temperatures[0], Math.min(val, temperatures.slice(-1)[0]));

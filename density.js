@@ -73,7 +73,7 @@
         });
       };
       api = function(selection) {
-        var ELEVATION, clip, defs, el_xAxis, el_y0Axis, el_y1Axis, plots, plotsBg, solutions, svg, xLabel, yLabel;
+        var ELEVATION, clip, defs, el_xAxis, el_y0Axis, el_y1Axis, plots, plotsBg, solutions, svg, xLabel, y0Label, y1Label;
         selection.classed({
           density: true,
           explanation: true
@@ -90,6 +90,57 @@
           scaleSolution = Exp.laws.Density(ELEVATION);
           scaleSolutions = solutionParts.map(function(part) {
             return [ELEVATION, scaleSolution[part]];
+          });
+          svg.selectAll(".solution.interactive").data([[ELEVATION, ELEVATION], [ELEVATION, scaleSolutions[0][1]], [ELEVATION, scaleSolutions[1][1]], [ELEVATION, scaleSolutions[2][1]]]).call(function(solutionLabel) {
+            return solutionLabel.enter().append("g").classed({
+              solution: true,
+              interactive: true
+            }).append("text").style({
+              fill: function(d, i) {
+                return ["black", "blue", "red", "green"][i];
+              }
+            }).attr({
+              "text-anchor": function(d, i) {
+                if (i === 0) {
+                  return "middle";
+                } else if (i === 1) {
+                  return "start";
+                } else {
+                  return "end";
+                }
+              }
+            });
+          }).attr({
+            transform: function(d, i) {
+              if (i === 0) {
+                return "translate(" + (scales.x(d[1])) + ", " + (padding.top - 10) + ")";
+              } else if (i === 1) {
+                return "translate(" + (padding.left + 5) + ", " + (scales.y[0](d[1])) + ")";
+              } else {
+                return "translate(" + (scales.x.range()[1] - 5) + ", " + (scales.y[1](d[1])) + ")";
+              }
+            }
+          }).select("text").text(function(d, i) {
+            return ['m', 'K', 'rP', 'rD'][i] + " = " + (d[1].toFixed(2));
+          });
+          solutions.selectAll(".solution.reference").data(scaleSolutions).call(function(solution) {
+            return solution.enter().append("g").classed({
+              solution: true,
+              reference: true
+            }).call(function(solution) {
+              return solution.append("circle").attr({
+                r: 5
+              }).style({
+                stroke: function(d, i) {
+                  return scales.color(i);
+                }
+              });
+            });
+          }).attr({
+            transform: function(d, i) {
+              i = i === 0 ? 0 : 1;
+              return "translate(" + (scales.x(d[0])) + ", " + (scales.y[i](d[1])) + " )";
+            }
           });
           return api;
         };
@@ -129,8 +180,11 @@
           xLabel.attr({
             transform: "translate(" + (WIDTH / 2) + ", " + (scales.y[0].range()[0] + 40) + ")"
           });
-          yLabel.attr({
+          y0Label.attr({
             transform: "translate(10, " + (HEIGHT / 2) + ") rotate(-90)"
+          });
+          y1Label.attr({
+            transform: "translate(" + (WIDTH - 10) + ", " + (HEIGHT / 2) + ") rotate(90)"
           });
           return api.update();
         };
@@ -180,11 +234,11 @@
             xLabel.append("tspan").text("Altitude");
             return xLabel.append("tspan").classed({
               unit: true
-            }).text(" [km]");
+            }).text(" [m]");
           });
-          return svg.append("g").classed({
+          svg.append("g").classed({
             label: true,
-            y: true
+            y0: true
           }).append("text").attr({
             "text-anchor": "middle",
             dy: ".71em"
@@ -193,6 +247,19 @@
             return yLabel.append("tspan").classed({
               unit: true
             }).text("[K]");
+          });
+          return svg.append("g").classed({
+            label: true,
+            y1: true
+          }).append("text").attr({
+            "text-anchor": "middle",
+            dy: ".71em",
+            y: -10
+          }).call(function(yLabel) {
+            yLabel.append("tspan").text("Relative Pressure, Density ");
+            return yLabel.append("tspan").classed({
+              unit: true
+            }).text("[bar, rho]");
           });
         });
         plots = svg.select(".plots");
@@ -204,7 +271,8 @@
         el_y0Axis = svg.select(".axis.y0");
         el_y1Axis = svg.select(".axis.y1");
         xLabel = svg.select(".label.x text");
-        yLabel = svg.select(".label.y text");
+        y0Label = svg.select(".label.y0 text");
+        y1Label = svg.select(".label.y1 text");
         d3.select(window).on({
           "resize.density": api.resize
         });
