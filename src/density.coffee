@@ -96,6 +96,53 @@ define ["./explanation.js"], (Exp)->
             scaleSolution[part]
           ]
 
+        svg.selectAll ".solution.interactive"
+          .data [
+            [ELEVATION, ELEVATION]
+            [ELEVATION, scaleSolutions[0][1]]
+            [ELEVATION, scaleSolutions[1][1]]
+            [ELEVATION, scaleSolutions[2][1]]
+          ]
+          .call (solutionLabel) ->
+            solutionLabel.enter()
+              .append "g"
+              .classed solution: true, interactive: true
+              .append "text"
+              .style
+                fill: (d, i) -> ["black", "blue", "red", "green"][i]
+              .attr
+                "text-anchor": (d, i) ->
+                  if i == 0
+                    "middle"
+                  else if i == 1
+                    "start"
+                  else
+                    "end"
+          .attr
+            transform: (d, i) ->
+              if i == 0
+                "translate(#{scales.x d[1]}, #{padding.top - 10})"
+              else if i == 1
+                "translate(#{padding.left + 5}, #{scales.y[0] d[1]})"
+              else
+                "translate(#{scales.x.range()[1] - 5}, #{scales.y[1] d[1]})"
+          .select "text"
+            .text (d, i)->
+                "#{['m','K','rP','rD'][i]} = #{d[1].toFixed 2}"
+
+        solutions.selectAll ".solution.reference"
+          .data scaleSolutions
+          .call (solution) ->
+            solution.enter()
+              .append "g"
+              .classed solution: true, reference: true
+              .call (solution) ->
+                solution.append "circle"
+                  .attr r: 5
+                  .style stroke: (d, i) -> scales.color i
+          .attr transform: (d, i) ->
+            i = if i == 0 then 0 else 1
+            "translate(#{scales.x d[0]}, #{scales.y[i] d[1]} )"
         api
 
       api.resize = (event) ->
@@ -138,8 +185,10 @@ define ["./explanation.js"], (Exp)->
 
         xLabel.attr
           transform: "translate(#{ WIDTH/2 }, #{scales.y[0].range()[0] + 40})"
-        yLabel.attr
+        y0Label.attr
           transform: "translate(10, #{ HEIGHT/2 }) rotate(-90)"
+        y1Label.attr
+          transform: "translate(#{ WIDTH - 10 }, #{ HEIGHT/2 }) rotate(90)"
 
         api.update()
 
@@ -186,10 +235,10 @@ define ["./explanation.js"], (Exp)->
 
               xLabel.append "tspan"
                 .classed unit: true
-                .text " [km]"
+                .text " [m]"
 
           svg.append "g"
-            .classed label: true, y: true
+            .classed label: true, y0: true
             .append "text"
             .attr "text-anchor": "middle", dy: ".71em"
             .call (yLabel) ->
@@ -198,6 +247,17 @@ define ["./explanation.js"], (Exp)->
               yLabel.append "tspan"
                 .classed unit: true
                 .text "[K]"
+
+          svg.append "g"
+            .classed label: true, y1: true
+            .append "text"
+            .attr "text-anchor": "middle", dy: ".71em", y: -10
+            .call (yLabel) ->
+              yLabel.append "tspan"
+                .text "Relative Pressure, Density "
+              yLabel.append "tspan"
+                .classed unit: true
+                .text "[bar, rho]"
 
       plots = svg.select ".plots"
       solutions = plots.select ".solutions"
@@ -208,7 +268,8 @@ define ["./explanation.js"], (Exp)->
       el_y0Axis = svg.select ".axis.y0"
       el_y1Axis = svg.select ".axis.y1"
       xLabel = svg.select ".label.x text"
-      yLabel = svg.select ".label.y text"
+      y0Label = svg.select ".label.y0 text"
+      y1Label = svg.select ".label.y1 text"
 
       # listen for window resize
       # it is still the job of the owner of `selection` to update)
