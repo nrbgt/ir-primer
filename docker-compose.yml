@@ -1,0 +1,9 @@
+irprimer:
+  command: npm run live
+  build: .
+  volumes:
+    - ./src:/srv/ir-primer/src
+    - ./dist:/srv/ir-primer/dist
+    - ./bin:/srv/ir-primer/bin
+  ports:
+    - 8080:8080
