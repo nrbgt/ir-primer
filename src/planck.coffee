@@ -141,6 +141,10 @@ define ["./explanation.js"], (Exp)->
           .select "text"
           .text "λ: #{ WAVELENGTH.toFixed(2) }"
 
+        sliderFormula.select ".wavelength"
+          .classed variable: false
+          .text WAVELENGTH.toFixed(2)
+
         solutions.selectAll '.solution.interactive'
           .data [solution.solution]
           .call (solution) ->
@@ -232,8 +236,12 @@ define ["./explanation.js"], (Exp)->
           HEIGHT - sliderPadding.bottom
           sliderPadding.top
         ]
-        slider.attr transform: "translate(#{ scales.x.range()[1] + 20 }, 0)"
-        sliderLabel.attr transform: "translate(#{ sidebarWidth }, #{ HEIGHT/2 }) rotate(90)"
+        slider.attr
+          transform: "translate(#{ scales.x.range()[1] + 20 }, 0)"
+        sliderLabel.attr
+          transform: "translate(#{ sidebarWidth }, #{ HEIGHT/2 }) rotate(90)"
+        sliderFormula.attr
+          transform: "translate(#{ sidebarWidth/2 } #{padding.top} )"
         sliderReferences.attr transform: (d) ->
           "translate(0, #{ scales.slider d.temperature })"
 
@@ -353,7 +361,24 @@ define ["./explanation.js"], (Exp)->
             .classed slider: true
 
           slider.append "text"
-            .classed label: true
+            .classed
+              formula: true
+              label: true
+            .call (sliderFormula) ->
+              sliderFormula.append "tspan"
+                .classed variable: true
+                .text "I("
+              sliderFormula.append "tspan"
+                .classed variable: true, wavelength: true
+                .text "λ"
+              sliderFormula.append "tspan"
+                .classed variable: true
+                .text ",T)"
+
+          slider.append "text"
+            .classed
+              label: true
+              axisLabel: true
             .attr "text-anchor": "middle"
             .call (sliderLabel) ->
               sliderLabel.append "tspan"
@@ -399,7 +424,8 @@ define ["./explanation.js"], (Exp)->
 
       sliderReferences = slider.selectAll ".reference"
       slideHandle = slider.select ".handle"
-      sliderLabel = slider.select "text"
+      sliderLabel = slider.select ".label.axisLabel"
+      sliderFormula = slider.select ".label.formula"
       handleLabel = slideHandle.select "text.temperature"
       handleSolution = slideHandle.select "text.solution"
 
