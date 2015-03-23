@@ -107,7 +107,7 @@
         y: d3.svg.axis().scale(scales.y).orient('left')
       };
       api = function(selection) {
-        var clip, defs, el_xAxis, el_yAxis, handleLabel, handleSolution, plots, plotsBg, slide, slideHandle, slider, sliderLabel, sliderReferences, solutions, spectrum, svg, wavelengthLabel, wienSeries, xLabel, yLabel;
+        var clip, defs, el_xAxis, el_yAxis, handleLabel, handleSolution, plots, plotsBg, slide, slideHandle, slider, sliderFormula, sliderLabel, sliderReferences, solutions, spectrum, svg, wavelengthLabel, wienSeries, xLabel, yLabel;
         selection.classed({
           planck: true,
           explanation: true
@@ -143,6 +143,9 @@
           wavelengthLabel.attr({
             transform: "translate(" + (scales.x(WAVELENGTH)) + ", 20)"
           }).select("text").text("λ: " + (WAVELENGTH.toFixed(2)));
+          sliderFormula.select(".wavelength").classed({
+            variable: false
+          }).text(WAVELENGTH.toFixed(2));
           solutions.selectAll('.solution.interactive').data([solution.solution]).call(function(solution) {
             return solution.enter().append("g").classed({
               solution: true,
@@ -241,6 +244,9 @@
           });
           sliderLabel.attr({
             transform: "translate(" + sidebarWidth + ", " + (HEIGHT / 2) + ") rotate(90)"
+          });
+          sliderFormula.attr({
+            transform: "translate(" + (sidebarWidth / 2) + " " + padding.top + " )"
           });
           sliderReferences.attr({
             transform: function(d) {
@@ -358,7 +364,23 @@
             slider: true
           });
           slider.append("text").classed({
+            formula: true,
             label: true
+          }).call(function(sliderFormula) {
+            sliderFormula.append("tspan").classed({
+              variable: true
+            }).text("I(");
+            sliderFormula.append("tspan").classed({
+              variable: true,
+              wavelength: true
+            }).text("λ");
+            return sliderFormula.append("tspan").classed({
+              variable: true
+            }).text(",T)");
+          });
+          slider.append("text").classed({
+            label: true,
+            axisLabel: true
           }).attr({
             "text-anchor": "middle"
           }).call(function(sliderLabel) {
@@ -406,7 +428,8 @@
         });
         sliderReferences = slider.selectAll(".reference");
         slideHandle = slider.select(".handle");
-        sliderLabel = slider.select("text");
+        sliderLabel = slider.select(".label.axisLabel");
+        sliderFormula = slider.select(".label.formula");
         handleLabel = slideHandle.select("text.temperature");
         handleSolution = slideHandle.select("text.solution");
         d3.select(window).on({
