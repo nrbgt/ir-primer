@@ -17,12 +17,12 @@ html(lang="en")
           background-size cover
       
     include ./lib/mathjax.jade
-    
+
   body
     h1 An Infrared Primer
     blockquote.
       Visual explorations of key concepts in the infrared spectrum
-    
+
     .screenshots
       each exp in ["temperatures", "wavelengths", "planck", "fresnel", "density"]
         a(href="./" + exp + ".html"
@@ -30,4 +30,3 @@ html(lang="en")
     
     h2 
       a(href="./An IR Primer.slides.local.html") IPython Notebook Integration
-        
