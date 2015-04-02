@@ -18,7 +18,7 @@ html(lang="en")
   body
     .titles
       .title
-        h1 Celsius
+        h1.fill-celsius Celsius
         .equation.
           \definecolor{other}{RGB}{100,100,100}
           \definecolor{kelvin}{RGB}{0,0,0}
@@ -31,7 +31,7 @@ html(lang="en")
           \color{kelvin}<%= K %>
           \color{other} -273.15
       .title
-        h1 Fahrenheit
+        h1.fill-fahrenheit Fahrenheit
         .equation.
           \definecolor{other}{RGB}{100,100,100}
           \definecolor{kelvin}{RGB}{0,0,0}
@@ -41,10 +41,10 @@ html(lang="en")
 
           \color{fahrenheit}<%= F %>
           \color{other} = (
-          \color{kelvin}<%= K %>\color{other}
+          \color{kelvin}<%= K %>
           \color{other}\times\frac{9}{5}) - 459.67
       .title
-        h1 Rankine
+        h1.fill-rankine Rankine
         .equation.
           \definecolor{other}{RGB}{100,100,100}
           \definecolor{kelvin}{RGB}{0,0,0}
