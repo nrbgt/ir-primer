@@ -38,45 +38,47 @@
     <div class="titles">
       <div class="title">
         <h1>Celsius</h1>
-        <blockquote><p>TBD</p>
-
-        </blockquote>
         <div class="equation">
-          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{other}{RGB}{100,100,100}
           \definecolor{kelvin}{RGB}{0,0,0}
           \definecolor{celsius}{RGB}{0,128,0}
           \definecolor{fahrenheit}{RGB}{128,0,0}
           \definecolor{rankine}{RGB}{0,0,255}
-          \color{kelvin}<%= K %> \color{other}= \color{celsius}<%= C %>\color{other}+273.15
+          
+          \color{celsius}<%= C %>
+          \color{other} =
+          \color{kelvin}<%= K %>
+          \color{other} -273.15
         </div>
       </div>
       <div class="title">
         <h1>Fahrenheit</h1>
-        <blockquote><p>TBD</p>
-
-        </blockquote>
         <div class="equation">
           \definecolor{other}{RGB}{200,200,200}
           \definecolor{kelvin}{RGB}{0,0,0}
           \definecolor{celsius}{RGB}{0,128,0}
           \definecolor{fahrenheit}{RGB}{255,0,0}
           \definecolor{rankine}{RGB}{0,0,255}
-          \color{kelvin}<%= K %>\color{other}=
-          (\color{fahrenheit}<%= F %>\color{other}+459.67)\times\frac{5}{9}
+          
+          \color{fahrenheit}<%= F %>
+          \color{other} = (
+          \color{kelvin}<%= K %>\color{other}
+          \color{other}\times\frac{9}{5}) - 459.67
         </div>
       </div>
       <div class="title">
         <h1>Rankine</h1>
-        <blockquote><p>TBD</p>
-
-        </blockquote>
         <div class="equation">
           \definecolor{other}{RGB}{200,200,200}
           \definecolor{kelvin}{RGB}{0,0,0}
           \definecolor{celsius}{RGB}{0,128,0}
           \definecolor{fahrenheit}{RGB}{255,0,0}
           \definecolor{rankine}{RGB}{0,0,255}
-          \color{kelvin}<%= K %>\color{other}=\color{rankine}<%= R %>\color{other}\times\frac{5}{9}
+          
+          \color{rankine}<%= R %>
+          \color{other}=
+          \color{kelvin}<%= K %>
+          \color{other}\times\frac{9}{5}
         </div>
       </div>
     </div>
