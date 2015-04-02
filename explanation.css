@@ -54,3 +54,9 @@
   stroke-width: 6px !important;
   stroke: #900;
 }
+.explanation svg .plots .scanline path {
+  stroke: #999;
+}
+.explanation svg .plots .solutions .legend text {
+  fill: #333;
+}

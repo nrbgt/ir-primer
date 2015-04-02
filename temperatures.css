@@ -1,1 +1,29 @@
 @import "explanation.css";
+.fill-rankine {
+  fill: #00f;
+  color: #00f;
+}
+.stroke-rankine {
+  stroke: #00f;
+}
+.fill-fahrenheit {
+  fill: #f00;
+  color: #f00;
+}
+.stroke-fahrenheit {
+  stroke: #f00;
+}
+.fill-celsius {
+  fill: #008000;
+  color: #008000;
+}
+.stroke-celsius {
+  stroke: #008000;
+}
+.fill-kelvin {
+  fill: #000;
+  color: #000;
+}
+.stroke-kelvin {
+  stroke: #000;
+}

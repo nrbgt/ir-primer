@@ -37,7 +37,7 @@
   <body>
     <div class="titles">
       <div class="title">
-        <h1>Celsius</h1>
+        <h1 class="fill-celsius">Celsius</h1>
         <div class="equation">
           \definecolor{other}{RGB}{100,100,100}
           \definecolor{kelvin}{RGB}{0,0,0}
@@ -52,9 +52,9 @@
         </div>
       </div>
       <div class="title">
-        <h1>Fahrenheit</h1>
+        <h1 class="fill-fahrenheit">Fahrenheit</h1>
         <div class="equation">
-          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{other}{RGB}{100,100,100}
           \definecolor{kelvin}{RGB}{0,0,0}
           \definecolor{celsius}{RGB}{0,128,0}
           \definecolor{fahrenheit}{RGB}{255,0,0}
@@ -62,14 +62,14 @@
           
           \color{fahrenheit}<%= F %>
           \color{other} = (
-          \color{kelvin}<%= K %>\color{other}
+          \color{kelvin}<%= K %>
           \color{other}\times\frac{9}{5}) - 459.67
         </div>
       </div>
       <div class="title">
-        <h1>Rankine</h1>
+        <h1 class="fill-rankine">Rankine</h1>
         <div class="equation">
-          \definecolor{other}{RGB}{200,200,200}
+          \definecolor{other}{RGB}{100,100,100}
           \definecolor{kelvin}{RGB}{0,0,0}
           \definecolor{celsius}{RGB}{0,128,0}
           \definecolor{fahrenheit}{RGB}{255,0,0}
