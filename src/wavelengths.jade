@@ -6,16 +6,32 @@ html(lang="en")
     style: :stylus
       @import "./wavelengths.css"
       @import "./standalone.css"
+      .title
+        &.wavenumber
+          color purple
+        &.energy.ev
+          color red
+        &.energy.joule
+          color blue
     include ./lib/mathjax.jade
 
 
   body
     .titles
+      .title.wavenumber
+        h1 Wavenumber
+        .equation.
+
+      .title.energy.ev
+        h1 Energy [eV]
+        .equation.
+
+      .title.energy.joule
+        h1 Energy [J]
+        .equation.
+
       .title
-        h1 Wavelengths
-        blockquote
-          :markdown
-            TBD
+        h1 Frequency
         .equation.
     .explanation
 
@@ -25,6 +41,6 @@ html(lang="en")
         require ["./bower_components/d3/d3.js", "./wavelengths.js"],
           (d3, Wavelengths) ->
             wavelengths = Wavelengths d3
-            
+
             plot = d3.select ".explanation"
               .call wavelengths
