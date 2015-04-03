@@ -155,7 +155,7 @@
           sliderReferences.selectAll("text.solution").text(function(d) {
             return "" + (expwn(solutionObj[d.temperature]));
           });
-          labels = ["Wavelength", "Temperature", "Spectral Exitance", "Max Spectral Exitance"];
+          labels = ["Wavelength [µm]", "Temperature [K]", "Spectral Exitance [W/m²-µm]", "Max Spectral Exitance [W/m²-µm]"];
           solutions.selectAll(".solution.legend").data([WAVELENGTH.toFixed(2), TEMPERATURE.toFixed(2), expwn(solution[1]), expwn(wiensLaw(TEMPERATURE)[1])]).call(function(solution) {
             solution.enter().append("g").classed({
               solution: true,
@@ -172,18 +172,26 @@
             });
             solution.attr({
               transform: function(d, i) {
-                return "translate(\n" + (scales.x.range()[1] - sidebarWidth * 2.5) + "\n" + ((i + 1) * 30) + ")";
+                return "translate(\n" + (scales.x.range()[1] - sidebarWidth * 4) + "\n" + ((i + 1) * 30) + ")";
               }
             });
             solution.select(".scale").text(function(d, i) {
               return labels[i];
             }).style({
-              fill: "black"
+              fill: function(d, i) {
+                if (i === 3) {
+                  return "#900";
+                }
+              }
             });
             return solution.select(".value").text(function(d, i) {
               return d;
             }).style({
-              fill: "black"
+              fill: function(d, i) {
+                if (i === 3) {
+                  return "#900";
+                }
+              }
             });
           });
           return api;

@@ -22,7 +22,7 @@
       x: [0.1, 100],
       y: [[0, 1e5], [0, 3000], [0.01, 13], [1e-21, 1e-17]]
     };
-    labels = ["Wavenumber", "Frequency [THz]", "Energy [EV]", "Energy [J]"];
+    labels = ["Wavenumber [cm⁻¹]", "Frequency [THz]", "Energy [EV]", "Energy [J]"];
     converters = [Exp.laws.Wavenumber, Exp.laws.Frequency, Exp.laws.EnergyEV, Exp.laws.EnergyJ];
     expwn = Exp.scientificNotation;
     Wavelengths = function(_d3) {
@@ -183,7 +183,7 @@
               }
             });
             solution.select(".scale").text(function(d, i) {
-              return ["Wavelength"].concat(labels)[i];
+              return ["Wavelength [µm]"].concat(labels)[i];
             }).style({
               fill: colorizeLegend
             });

@@ -23,7 +23,7 @@
       y1: [-1000, 4000]
     };
     converters = [Exp.laws.Celsius, Exp.laws.Fahrenheit, Exp.laws.Rankine];
-    labels = ["Celsius", "Fahrenheit", "Rankine"];
+    labels = ["Celsius [C]", "Fahrenheit [F]", "Rankine [R]"];
     references = converters.map(function(convert, i) {
       return {
         scaleIdx: i,
@@ -162,7 +162,7 @@
               }
             });
             solution.select(".scale").text(function(d, i) {
-              return ["Kelvin"].concat(labels)[i];
+              return ["Kelvin [K]"].concat(labels)[i];
             }).style({
               fill: colorizeLegend
             });

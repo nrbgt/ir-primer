@@ -29,7 +29,7 @@
         points: []
       };
     });
-    labels = ["Altitude", "Temperature", "Relative Pressure", "Relative Density"];
+    labels = ["Altitude [m]", "Temperature [K]", "Relative Pressure", "Relative Density"];
     elevations.map(function(elevation) {
       var data;
       data = Exp.laws.Density(elevation);
@@ -137,7 +137,7 @@
             d: d3.svg.line()
           });
           solutions.attr({
-            transform: "translate(" + (scales.x.range()[1] - padding.left * 1.5) + ", " + (2 * padding.top) + ")"
+            transform: "translate(" + (scales.x.range()[1] - padding.left * 2) + ", " + (2 * padding.top) + ")"
           }).selectAll(".solution.legend").data([[ELEVATION, ELEVATION]].concat(scaleSolutions)).call(function(solution) {
             solution.enter().append("g").classed({
               solution: true,
