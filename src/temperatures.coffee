@@ -144,7 +144,6 @@ define ["./explanation.js"], (Exp)->
           .attr
             d: d3.svg.line()
 
-
         solutions
           .attr
             transform: "translate(#{ padding.left + 2 * padding.top }, #{ 2 * padding.top})"

@@ -152,6 +152,23 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
             .join ""
           mag + "10" + sign + exp
 
+  drawIrBands = (parent) ->
+    parent.selectAll "g.ir-band"
+      .data [
+        {band: [3, 5], name: "Midwave IR"}
+        {band: [8, 12], name: "Longwave IR"}
+      ]
+      .enter()
+      .append "g"
+      .classed "ir-band": true
+      .call (band) ->
+        band.append "rect"
+        band.append "text"
+          .text ({name}) -> name
+          .attr
+            dy: "1em"
+            "text-anchor": "end"
+
   # the public API
   Explanation =
     laws: laws
@@ -159,3 +176,4 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
     scientificNotation: scientificNotation
     math: math
     defs: defs
+    drawIrBands: drawIrBands

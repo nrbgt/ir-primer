@@ -25,6 +25,12 @@ define ["./explanation.js"], (Exp)->
       [1e-21, 1e-17]
     ]
 
+  labels = [
+    "Wavenumber"
+    "Frequency [THz]"
+    "Energy [EV]"
+    "Energy [J]"
+  ]
 
   converters = [
     Exp.laws.Wavenumber
@@ -91,6 +97,9 @@ define ["./explanation.js"], (Exp)->
         fn wavelength
       ]
 
+    colorizeLegend = (d, i) ->
+      if i then scales.color i - 1  else "black"
+
     dispatch = d3.dispatch "update"
 
     api = (selection) ->
@@ -117,31 +126,28 @@ define ["./explanation.js"], (Exp)->
             convert WAVELENGTH
           ]
 
-        wavelengthLabel.attr transform: "translate(#{ scales.x WAVELENGTH }, 20)"
-          .select "text"
-          .text "λ: #{ WAVELENGTH.toFixed(2) }"
-
         plots.selectAll ".solution.interactive"
           .data scaleSolutions
           .call (solutionLabel) ->
             solutionLabel.enter()
               .append "g"
               .classed solution: true, interactive: true
-              .append "text"
+              .append "line"
               .style
-                fill: (d, i) -> scales.color i
+                stroke: (d, i) -> scales.color i
               .attr
-                "text-anchor": (d, i) ->
-                  if i % 2 == 0
-                    "start"
-                  else
-                    "end"
+                x1: 0
+                y1: 0
+                x2: (d, i) -> if i % 2 then -20 else 20
+                y2: 0
+                "marker-start": (d, i) -> "url(#end-arrow-#{scales.color i})"
+
           .attr
             transform: (d, i) ->
               if i % 2 == 0
-                "translate(#{padding.left + 5}, #{scales.y[i] d[1]})"
+                "translate(#{padding.left}, #{scales.y[i] d[1]})"
               else
-                "translate(#{scales.x.range()[1] - 5}, #{scales.y[i] d[1]})"
+                "translate(#{scales.x.range()[1]}, #{scales.y[i] d[1]})"
 
           .select "text"
             .text (d, i) ->
@@ -150,20 +156,47 @@ define ["./explanation.js"], (Exp)->
               else
                 "#{d[1].toFixed 2}"
 
-        solutions.selectAll ".solution.reference"
-          .data scaleSolutions
+
+        plots.selectAll ".scanline path"
+          .data [
+            [
+              [scales.x(WAVELENGTH), scales.y[0].range()[0]]
+              [scales.x(WAVELENGTH), scales.y[0].range()[1]]
+            ],
+            [
+              [scales.x(WAVELENGTH), scales.y[2].range()[0]]
+              [scales.x(WAVELENGTH), scales.y[2].range()[1]]
+            ]
+          ]
+          .attr
+            d: d3.svg.line()
+
+        solutions
+          .selectAll ".solution.legend"
+          .data [[WAVELENGTH, WAVELENGTH]].concat scaleSolutions
           .call (solution) ->
             solution.enter()
               .append "g"
-              .classed solution: true, reference: true
+              .classed solution: true, legend: true
               .call (solution) ->
-                solution.append "circle"
-                  .attr r: 5
-                  .style
-                    stroke: (d, i) -> scales.color i
-                    fill: (d, i) -> scales.color i
-          .attr transform: (d, i) ->
-            "translate(#{scales.x d[0]}, #{scales.y[i] d[1]} )"
+                solution.append "text"
+                  .classed scale: true
+                  .attr dx: 10
+                solution.append "text"
+                  .classed value: true
+                  .attr "text-anchor", "end"
+
+            solution
+              .attr
+                transform: (d, i) -> "translate(0 #{i * 30})"
+
+            solution.select ".scale"
+              .text (d, i) -> ["Wavelength"].concat(labels)[i]
+              .style fill: colorizeLegend
+
+            solution.select ".value"
+              .text (d, i) -> d[1].toFixed 2
+              .style fill: colorizeLegend
 
       api.resize = ->
         # do things based on window resize
@@ -183,15 +216,37 @@ define ["./explanation.js"], (Exp)->
 
         plotsBg.attr width: WIDTH - padding.right, height: HEIGHT
 
+        solutions.attr
+          transform: "translate(#{ WIDTH - 2.5 * padding.left }, #{ 2 * padding.top})"
 
-        spectrum.attr
-          x: scales.x 0.380
-          y: padding.top
-          width: (scales.x 0.750) - (scales.x 0.380)
-          height: HEIGHT - padding.top - padding.bottom
+        spectrum
+          .attr
+            transform: "translate(#{scales.x 0.380} #{padding.top})"
+        .select "rect"
+          .attr
+            width: (scales.x 0.750) - (scales.x 0.380)
+            height: HEIGHT
+
+        spectrum.select "text"
+          .attr
+            transform: (d) ->
+              "translate(0 10) rotate(-90)"
 
 
-        # TODO: need two of these
+        irBand
+          .attr
+            transform: (d) ->
+              "translate(#{ scales.x(d.band[0])} #{padding.top})"
+          .select "rect"
+            .attr
+              height: HEIGHT
+              width: (d) -> scales.x(d.band[1]) - scales.x(d.band[0])
+        irBand
+          .select "text"
+          .attr
+            transform: (d) ->
+              "translate(0 10) rotate(-90)"
+
         clip.attr
           width: WIDTH,
           height: HEIGHT - padding.top - padding.bottom,
@@ -266,13 +321,38 @@ define ["./explanation.js"], (Exp)->
             .attr id: "wavelengthsPath"
             .append "rect"
 
+          defs.selectAll "marker.arrow"
+            .data scales.color.range()
+            .enter()
+            .append "marker"
+            .classed arrow: true
+            .attr
+              id: (d) -> "end-arrow-#{d}"
+              viewBox: "0 -5 10 10"
+              markerWidth: 6
+              markerHeight: 6
+              orient: "auto"
+            .append "path"
+            .attr d: "M 10,-5 L 0,0 L 10,5"
+            .style fill: Object
+
           svg.append "g"
             .classed plots: true
             .attr "clip-path": "url(#wavelengthsPath)"
             .call (plots) ->
-              plots.append "rect"
+              plots
+                .append "g"
                 .classed spectrum: true
-                .style fill: "url(#spectrumGradient)"
+                .call (spectrum) ->
+                  spectrum.append "rect"
+                    .style fill: "url(#spectrumGradient)"
+                  spectrum.append "text"
+                    .text "Visible Light"
+                    .attr
+                      dy: "1em"
+                      "text-anchor": "end"
+
+              plots.call Exp.drawIrBands
 
               plots.append "rect"
                 .classed bg: true
@@ -280,6 +360,12 @@ define ["./explanation.js"], (Exp)->
 
               plots.append "g"
                 .classed solutions: true
+
+              for i in [0, 1]
+                plots.append "g"
+                  .classed scanline: true
+                  .append "path"
+
 
           svg.append "g"
             .classed axis: true, x: true
@@ -315,6 +401,7 @@ define ["./explanation.js"], (Exp)->
             .call (yLabel) ->
               yLabel.append "tspan"
                 .text "Wavenumber"
+                .classed "fill-wavenumber": true
 
               yLabel.append "tspan"
                 .classed unit: true
@@ -327,6 +414,7 @@ define ["./explanation.js"], (Exp)->
             .call (yLabel) ->
               yLabel.append "tspan"
                 .text "Frequency "
+                .classed "fill-frequency": true
 
               yLabel.append "tspan"
                 .classed unit: true
@@ -339,6 +427,7 @@ define ["./explanation.js"], (Exp)->
             .call (yLabel) ->
               yLabel.append "tspan"
                 .text "Energy "
+                .classed "fill-energy-ev": true
 
               yLabel.append "tspan"
                 .classed unit: true
@@ -351,6 +440,8 @@ define ["./explanation.js"], (Exp)->
             .call (yLabel) ->
               yLabel.append "tspan"
                 .text "Energy "
+                .classed "fill-energy-j": true
+
 
               yLabel.append "tspan"
                 .classed unit: true
@@ -376,8 +467,8 @@ define ["./explanation.js"], (Exp)->
       y1Label = svg.select ".label.y1 text"
       y2Label = svg.select ".label.y2 text"
       y3Label = svg.select ".label.y3 text"
-      wavelengthLabel = svg.select ".wavelength.interactive"
-      spectrum = svg.select ".spectrum"
+      spectrum = svg.selectAll ".spectrum"
+      irBand = svg.selectAll ".ir-band"
 
 
       # listen for window resize
