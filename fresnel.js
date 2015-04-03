@@ -24,7 +24,7 @@
     })();
     solutionParts = ["rs", "rp", "rtotal"];
     Fresnel = function(_d3) {
-      var api, axes, plotSeries, scales, seriesPath;
+      var api, axes, colorizeLegend, plotSeries, scales, seriesPath;
       d3 = _d3;
       scales = {
         x: d3.scale.linear().domain(domains.x),
@@ -57,6 +57,13 @@
           d: seriesPath
         });
       };
+      colorizeLegend = function(d, i) {
+        if (i) {
+          return scales.color(i - 1);
+        } else {
+          return "black";
+        }
+      };
       api = function(selection) {
         var INCIDENT_ANGLE, INCIDENT_ANGLE_N1, INDEX_N, clip, defs, el_iofrAxis, el_xAxis, el_yAxis, iofr, iofrBg, iofrLabel, iofrValues, plots, plotsBg, solutions, svg, xLabel, yLabel;
         selection.classed({
@@ -79,7 +86,7 @@
           return api.update();
         };
         api.update = function() {
-          var key, scaleSolution, scaleSolutions, serieses;
+          var key, labels, scaleSolution, scaleSolutions, serieses;
           serieses = (function() {
             var _i, _len, _results;
             _results = [];
@@ -103,51 +110,61 @@
           scaleSolutions = solutionParts.map(function(part) {
             return [INCIDENT_ANGLE, scaleSolution[part]];
           });
-          solutions.selectAll(".solution.reference").data(scaleSolutions).call(function(solution) {
-            return solution.enter().append("g").classed({
-              solution: true,
-              reference: true
-            }).call(function(solution) {
-              return solution.append("circle").attr({
-                r: 5
-              }).style({
-                stroke: function(d, i) {
-                  return scales.color(i);
-                }
-              });
-            });
-          }).attr({
-            transform: function(d, i) {
-              return "translate(" + (scales.x(d[0])) + ", " + (scales.y(d[1])) + " )";
-            }
+          plots.selectAll(".scanline path").data([[[scales.x(INCIDENT_ANGLE), scales.y.range()[0]], [scales.x(INCIDENT_ANGLE), scales.y.range()[1]]]]).attr({
+            d: d3.svg.line()
           });
-          solutions.selectAll(".solution.interactive").data([[INCIDENT_ANGLE, INCIDENT_ANGLE], [INCIDENT_ANGLE, scaleSolutions[0][1]], [INCIDENT_ANGLE, scaleSolutions[1][1]], [INCIDENT_ANGLE, scaleSolutions[2][1]]]).call(function(solutionLabel) {
+          labels = ["Incident Angle", "Reflection (Perpendicular)", "Reflection (Parallel)", "Reflection (Average)"];
+          solutions.selectAll(".solution.legend").data([[INCIDENT_ANGLE, INCIDENT_ANGLE]].concat(scaleSolutions)).call(function(solution) {
+            solution.enter().append("g").classed({
+              solution: true,
+              legend: true
+            }).call(function(solution) {
+              solution.append("text").classed({
+                scale: true
+              }).attr({
+                dx: 10
+              });
+              return solution.append("text").classed({
+                value: true
+              }).attr("text-anchor", "end");
+            });
+            solution.attr({
+              transform: function(d, i) {
+                return "translate(\n  " + (1.5 * padding.left) + " " + (padding.top + ((i + 1) * 30)) + "\n)";
+              }
+            });
+            solution.select(".scale").text(function(d, i) {
+              return labels[i];
+            }).style({
+              fill: colorizeLegend
+            });
+            return solution.select(".value").text(function(d, i) {
+              return d[1].toFixed(2);
+            }).style({
+              fill: colorizeLegend
+            });
+          });
+          solutions.selectAll(".solution.interactive").data([[INCIDENT_ANGLE, scaleSolutions[0][1]], [INCIDENT_ANGLE, scaleSolutions[1][1]], [INCIDENT_ANGLE, scaleSolutions[2][1]]]).call(function(solutionLabel) {
             return solutionLabel.enter().append("g").classed({
               solution: true,
               interactive: true
-            }).append("text").style({
-              fill: function(d, i) {
-                return ["black", "red", "blue", "green"][i];
+            }).append("line").style({
+              stroke: function(d, i) {
+                return scales.color(i);
               }
             }).attr({
-              "text-anchor": function(d, i) {
-                if (i === 0) {
-                  return "middle";
-                } else {
-                  return "end";
-                }
+              x1: 0,
+              y1: 0,
+              x2: 20,
+              y2: 0,
+              "marker-start": function(d, i) {
+                return "url(#end-arrow-" + (scales.color(i)) + ")";
               }
             });
           }).attr({
             transform: function(d, i) {
-              if (i === 0) {
-                return "translate(" + (scales.x(d[0])) + ", " + (padding.top + 20) + ")";
-              } else {
-                return "translate(" + (padding.left + 5) + ", " + (scales.y(d[1])) + ")";
-              }
+              return "translate(" + padding.left + ", " + (scales.y(d[1])) + ")";
             }
-          }).select("text").text(function(d, i) {
-            return ['Angle', 'Rs', 'Rp', 'Rtotal'][i] + " = " + (d[1].toFixed(2));
           });
           iofrValues.attr({
             transform: function(d) {
@@ -213,11 +230,28 @@
           svg = svg.enter().append("svg").classed({
             plot: true
           });
-          svg.append("defs").append("clipPath").classed({
-            "fresnel-path": true
-          }).attr({
-            id: "fresnelPath"
-          }).append("rect");
+          svg.append("defs").call(function(defs) {
+            defs.append("clipPath").classed({
+              "fresnel-path": true
+            }).attr({
+              id: "fresnelPath"
+            }).append("rect");
+            return defs.selectAll("marker.arrow").data(scales.color.range()).enter().append("marker").classed({
+              arrow: true
+            }).attr({
+              id: function(d) {
+                return "end-arrow-" + d;
+              },
+              viewBox: "0 -5 10 10",
+              markerWidth: 6,
+              markerHeight: 6,
+              orient: "auto"
+            }).append("path").attr({
+              d: "M 10,-5 L 0,0 L 10,5"
+            }).style({
+              fill: Object
+            });
+          });
           svg.append("g").append("text").classed({
             label: true,
             iofrLabel: true
@@ -258,9 +292,12 @@
             }).on({
               mousemove: api.explore
             });
-            return plots.append("g").classed({
+            plots.append("g").classed({
               solutions: true
             });
+            return plots.append("g").classed({
+              scanline: true
+            }).append("path");
           });
           svg.append("g").classed({
             axis: true,
