@@ -22,10 +22,12 @@
 .explanation svg text {
   font-size: 18px;
 }
-.explanation svg .label text {
+.explanation svg .label text,
+.explanation svg .label tspan {
   font-size: 32px;
 }
-.explanation svg .label text .unit {
+.explanation svg .label text .unit,
+.explanation svg .label tspan .unit {
   fill: #777;
 }
 .explanation svg .axis line,

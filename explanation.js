@@ -156,6 +156,15 @@
         }).style({
           "stop-color": function(d, i) {
             return spectrumColors[i];
+          },
+          "stop-opacity": function(d, i) {
+            if (d < 500) {
+              return i / 20;
+            } else if (d > 650) {
+              return (750 - d) / 100;
+            } else {
+              return 1;
+            }
           }
         });
       }
