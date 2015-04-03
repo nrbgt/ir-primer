@@ -165,8 +165,10 @@ define ["./explanation.js"], (Exp)->
           .text (d) -> "#{ expwn solutionObj[d.temperature] }"
 
         labels = [
-          "Wavelength", "Temperature", "Spectral Exitance",
-          "Max Spectral Exitance"
+          "Wavelength [µm]"
+          "Temperature [K]"
+          "Spectral Exitance [W/m²-µm]"
+          "Max Spectral Exitance [W/m²-µm]"
         ]
 
         solutions
@@ -193,17 +195,17 @@ define ["./explanation.js"], (Exp)->
               .attr
                 transform: (d, i) ->
                   """translate(
-                    #{scales.x.range()[1] - sidebarWidth * 2.5}
+                    #{scales.x.range()[1] - sidebarWidth * 4}
                     #{(i+1) * 30})
                   """
 
             solution.select ".scale"
               .text (d, i) -> labels[i]
-              .style fill: "black"
+              .style fill: (d, i) -> "#900" if i == 3
 
             solution.select ".value"
               .text (d, i) -> d
-              .style fill: "black"
+              .style fill: (d, i) -> "#900" if i == 3
 
         # for chaining
         api

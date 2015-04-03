@@ -26,8 +26,8 @@ define ["./explanation.js"], (Exp)->
     points: []
 
   labels = [
-    "Altitude"
-    "Temperature"
+    "Altitude [m]"
+    "Temperature [K]"
     "Relative Pressure"
     "Relative Density"
   ]
@@ -146,7 +146,7 @@ define ["./explanation.js"], (Exp)->
 
         solutions
           .attr
-            transform: "translate(#{ scales.x.range()[1] - padding.left * 1.5 }, #{ 2 * padding.top})"
+            transform: "translate(#{ scales.x.range()[1] - padding.left * 2 }, #{ 2 * padding.top})"
           .selectAll ".solution.legend"
           .data [[ELEVATION, ELEVATION]].concat scaleSolutions
           .call (solution) ->

@@ -27,9 +27,9 @@ define ["./explanation.js"], (Exp)->
   ]
 
   labels = [
-    "Celsius"
-    "Fahrenheit"
-    "Rankine"
+    "Celsius [C]"
+    "Fahrenheit [F]"
+    "Rankine [R]"
   ]
 
   references = converters.map (convert, i) ->
@@ -166,7 +166,7 @@ define ["./explanation.js"], (Exp)->
                 transform: (d, i) -> "translate(0 #{i * 30})"
 
             solution.select ".scale"
-              .text (d, i) -> ["Kelvin"].concat(labels)[i]
+              .text (d, i) -> ["Kelvin [K]"].concat(labels)[i]
               .style fill: colorizeLegend
 
             solution.select ".value"

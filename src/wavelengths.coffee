@@ -26,7 +26,7 @@ define ["./explanation.js"], (Exp)->
     ]
 
   labels = [
-    "Wavenumber"
+    "Wavenumber [cm⁻¹]"
     "Frequency [THz]"
     "Energy [EV]"
     "Energy [J]"
@@ -191,7 +191,7 @@ define ["./explanation.js"], (Exp)->
                 transform: (d, i) -> "translate(0 #{i * 30})"
 
             solution.select ".scale"
-              .text (d, i) -> ["Wavelength"].concat(labels)[i]
+              .text (d, i) -> ["Wavelength [µm]"].concat(labels)[i]
               .style fill: colorizeLegend
 
             solution.select ".value"
