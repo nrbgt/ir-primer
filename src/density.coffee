@@ -25,6 +25,13 @@ define ["./explanation.js"], (Exp)->
     scaleIdx: if i == 2 then 1 else i
     points: []
 
+  labels = [
+    "Altitude"
+    "Temperature"
+    "Relative Pressure"
+    "Relative Density"
+  ]
+
   elevations.map (elevation) ->
     data = Exp.laws.Density elevation
     references.map (series) ->
@@ -71,6 +78,9 @@ define ["./explanation.js"], (Exp)->
             fn = seriesPath scales.y[d.scaleIdx]
             fn d.points
 
+    colorizeLegend = (d, i) ->
+      if i then scales.color i - 1 else "black"
+
 
     api = (selection) ->
       selection.classed
@@ -98,7 +108,6 @@ define ["./explanation.js"], (Exp)->
 
         svg.selectAll ".solution.interactive"
           .data [
-            [ELEVATION, ELEVATION]
             [ELEVATION, scaleSolutions[0][1]]
             [ELEVATION, scaleSolutions[1][1]]
             [ELEVATION, scaleSolutions[2][1]]
@@ -107,22 +116,18 @@ define ["./explanation.js"], (Exp)->
             solutionLabel.enter()
               .append "g"
               .classed solution: true, interactive: true
-              .append "text"
+              .append "line"
               .style
-                fill: (d, i) -> ["black", "blue", "red", "green"][i]
+                stroke: (d, i) -> scales.color i
               .attr
-                "text-anchor": (d, i) ->
-                  if i == 0
-                    "middle"
-                  else if i == 1
-                    "start"
-                  else
-                    "end"
+                x1: 0
+                y1: 0
+                x2: (d, i) -> if i == 0 then 20 else -20
+                y2: 0
+                "marker-start": (d, i) -> "url(#end-arrow-#{scales.color i})"
           .attr
             transform: (d, i) ->
               if i == 0
-                "translate(#{scales.x d[1]}, #{padding.top - 10})"
-              else if i == 1
                 "translate(#{padding.left + 5}, #{scales.y[0] d[1]})"
               else
                 "translate(#{scales.x.range()[1] - 5}, #{scales.y[1] d[1]})"
@@ -130,19 +135,44 @@ define ["./explanation.js"], (Exp)->
             .text (d, i)->
                 "#{['m','K','rP','rD'][i]} = #{d[1].toFixed 2}"
 
-        solutions.selectAll ".solution.reference"
-          .data scaleSolutions
+
+        plots.select ".scanline path"
+          .datum [
+            [scales.x(ELEVATION), scales.y[0].range()[0]]
+            [scales.x(ELEVATION), scales.y[0].range()[1]]
+          ]
+          .attr
+            d: d3.svg.line()
+
+        solutions
+          .attr
+            transform: "translate(#{ scales.x.range()[1] - padding.left * 1.5 }, #{ 2 * padding.top})"
+          .selectAll ".solution.legend"
+          .data [[ELEVATION, ELEVATION]].concat scaleSolutions
           .call (solution) ->
             solution.enter()
               .append "g"
-              .classed solution: true, reference: true
+              .classed solution: true, legend: true
               .call (solution) ->
-                solution.append "circle"
-                  .attr r: 5
-                  .style stroke: (d, i) -> scales.color i
-          .attr transform: (d, i) ->
-            i = if i == 0 then 0 else 1
-            "translate(#{scales.x d[0]}, #{scales.y[i] d[1]} )"
+                solution.append "text"
+                  .classed scale: true
+                  .attr dx: 10
+                solution.append "text"
+                  .classed value: true
+                  .attr "text-anchor", "end"
+
+            solution
+              .attr
+                transform: (d, i) -> "translate(0 #{i * 30})"
+
+            solution.select ".scale"
+              .text (d, i) -> labels[i]
+              .style fill: colorizeLegend
+
+            solution.select ".value"
+              .text (d, i) -> d[1].toFixed 2
+              .style fill: colorizeLegend
+
         api
 
       api.resize = (event) ->
@@ -200,10 +230,26 @@ define ["./explanation.js"], (Exp)->
             .classed plot: true
 
           svg.append "defs"
-            .append "clipPath"
-              .classed "density-path": true
-              .attr id: "densityPath"
-              .append "rect"
+            .call (defs) ->
+              defs.append "clipPath"
+                .classed "density-path": true
+                .attr id: "densityPath"
+                .append "rect"
+
+
+              defs.selectAll "marker"
+                .data scales.color.range()
+                .enter()
+                .append "marker"
+                .attr
+                  id: (d) -> "end-arrow-#{d}"
+                  viewBox: "0 -5 10 10"
+                  markerWidth: 6
+                  markerHeight: 6
+                  orient: "auto"
+                .append "path"
+                .attr d: "M 10,-5 L 0,0 L 10,5"
+                .style fill: Object
 
           svg.append "g"
             .classed plots: true
@@ -215,6 +261,10 @@ define ["./explanation.js"], (Exp)->
 
               plots.append "g"
                 .classed solutions: true
+
+              plots.append "g"
+                .classed scanline: true
+                .append "path"
 
           svg.append "g"
             .classed axis: true, x: true
@@ -232,10 +282,19 @@ define ["./explanation.js"], (Exp)->
             .call (xLabel) ->
               xLabel.append "tspan"
                 .text "Altitude"
+                .classed "fill-altitude": true
 
               xLabel.append "tspan"
                 .classed unit: true
-                .text " [m]"
+                .text " ["
+
+              xLabel.append "tspan"
+                .classed "fill-altitude": true
+                .text "m"
+
+              xLabel.append "tspan"
+                .classed unit: true
+                .text " meters]"
 
           svg.append "g"
             .classed label: true, y0: true
@@ -244,9 +303,16 @@ define ["./explanation.js"], (Exp)->
             .call (yLabel) ->
               yLabel.append "tspan"
                 .text "Temperature "
+                .classed "fill-temperature": true
               yLabel.append "tspan"
                 .classed unit: true
-                .text "[K]"
+                .text "["
+              yLabel.append "tspan"
+                .classed "fill-temperature": true
+                .text "K"
+              yLabel.append "tspan"
+                .classed unit: true
+                .text "]"
 
           svg.append "g"
             .classed label: true, y1: true
@@ -254,10 +320,26 @@ define ["./explanation.js"], (Exp)->
             .attr "text-anchor": "middle", dy: ".71em", y: -10
             .call (yLabel) ->
               yLabel.append "tspan"
-                .text "Relative Pressure, Density "
+                .classed unit: true
+                .text "Relative "
+              yLabel.append "tspan"
+                .text "Pressure "
+                .classed "fill-relative-pressure": true
+              yLabel.append "tspan"
+                .text "Density "
+                .classed "fill-relative-density": true
               yLabel.append "tspan"
                 .classed unit: true
-                .text "[bar, rho]"
+                .text "["
+              yLabel.append "tspan"
+                .text "bar "
+                .classed "fill-relative-pressure": true
+              yLabel.append "tspan"
+                .text "ρ"
+                .classed "fill-relative-density": true
+              yLabel.append "tspan"
+                .classed unit: true
+                .text "]"
 
       plots = svg.select ".plots"
       solutions = plots.select ".solutions"
