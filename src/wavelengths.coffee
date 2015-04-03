@@ -142,20 +142,20 @@ define ["./explanation.js"], (Exp)->
                 y2: 0
                 "marker-start": (d, i) -> "url(#end-arrow-#{scales.color i})"
 
-          .attr
-            transform: (d, i) ->
-              if i % 2 == 0
-                "translate(#{padding.left}, #{scales.y[i] d[1]})"
-              else
-                "translate(#{scales.x.range()[1]}, #{scales.y[i] d[1]})"
+            solutionLabel.attr
+              transform: (d, i) ->
+                y = scales.y[i] d[1]
+
+                y = if Number.isNaN y then 0 else y
+
+                if i % 2 == 0
+                  "translate(#{padding.left}, #{y})"
+                else
+                  "translate(#{scales.x.range()[1]}, #{y})"
+
 
           .select "text"
-            .text (d, i) ->
-              if i == 3
-                expwn d[1]
-              else
-                "#{d[1].toFixed 2}"
-
+            .text (d, i) -> if i == 3 then expwn d[1] else "#{d[1].toFixed 2}"
 
         plots.selectAll ".scanline path"
           .data [

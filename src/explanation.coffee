@@ -137,6 +137,13 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
             offset: (d, i) -> spectrumOffset * i
           .style
             "stop-color": (d, i) -> spectrumColors[i]
+            "stop-opacity": (d, i) ->
+              if d < 500
+                i / 20
+              else if d > 650
+                (750 - d) / 100
+              else
+                1
 
 
   scientificNotation = (d) ->
