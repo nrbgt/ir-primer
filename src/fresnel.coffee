@@ -71,7 +71,7 @@ define ["./explanation.js"], (Exp)->
 
       api.exploreIofR = (d, i)->
         [mouseX, mouseY] = d3.mouse @
-        INDEX_N[i] = scales.iofr.invert mouseX
+        INDEX_N[d.key - 1] = scales.iofr.invert mouseX
         api.update()
 
       api.update = ->
@@ -165,9 +165,9 @@ define ["./explanation.js"], (Exp)->
         iofrValues
           .attr
             transform: (d) ->
-              "translate(#{ scales.iofr INDEX_N[d-1] }, 0)"
+              "translate(#{ scales.iofr INDEX_N[d.key - 1] }, 0)"
           .select "text"
-          .text (d) -> INDEX_N[d-1].toFixed 2
+          .text (d) -> INDEX_N[d.key - 1].toFixed 2
 
         plots.selectAll '.series'
           .data serieses
@@ -197,9 +197,10 @@ define ["./explanation.js"], (Exp)->
             "translate(#{ i * (WIDTH / 2) }, #{ HEIGHT - 80 })"
 
         iofrBg.attr
+          y: -20
           x: padding.left
           width: scales.iofr.range()[1] - scales.iofr.range()[0]
-          height: 20
+          height: 50
 
         clip.attr
           width: WIDTH,
@@ -222,7 +223,7 @@ define ["./explanation.js"], (Exp)->
           transform: "translate(10, #{ HEIGHT/2 }) rotate(-90)"
 
         iofrLabel.attr
-          transform: "translate(#{ WIDTH/2 }, #{ HEIGHT - 20 })"
+          transform: "translate(#{ WIDTH / 4 }, 50)"
 
         api.update()
 
@@ -255,14 +256,10 @@ define ["./explanation.js"], (Exp)->
                 .attr d: "M 10,-5 L 0,0 L 10,5"
                 .style fill: Object
 
-          svg.append "g"
-            .append "text"
-            .classed label: true, iofrLabel: true
-            .text "Index of Refraction"
-            .attr "text-anchor": "middle"
-
           svg.selectAll ".iofr"
-            .data [1, 2]
+            .data d3.entries
+              1: "Originating Index of Refraction"
+              2: "Incident Index of Refraction"
             .enter()
             .append "g"
             .classed iofr: true
@@ -272,8 +269,9 @@ define ["./explanation.js"], (Exp)->
                 .classed bg: true
               iofr.append "text"
                 .classed label: true
-                .text (d) -> "n#{ d }"
-                .attr x: padding.left - 20, "text-anchor": "end"
+                .text (d, i) -> "n#{d.key}: #{d.value}"
+                .attr
+                  "text-anchor": "middle"
 
               iofr.append "g"
                 .classed interactive: true
@@ -346,7 +344,7 @@ define ["./explanation.js"], (Exp)->
       solutions = plots.select ".solutions"
       plotsBg = plots.select ".bg"
       iofrBg = iofr.selectAll ".bg"
-      iofrLabel = svg.select ".iofrLabel"
+      iofrLabel = svg.selectAll ".iofr .label"
       iofrValues = iofr.selectAll ".interactive"
       defs = svg.select "defs"
       clip = defs.select ".fresnel-path rect"

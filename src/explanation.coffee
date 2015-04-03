@@ -64,7 +64,7 @@ define ["math", "underscore"], (math, _)->
     EnergyJ: (wavelength) ->
       C.hjs() * C.cms() * 1e6 / wavelength
 
-    Fresnel: _.memoize (incident_angle, incident_angle_n1=60, index_n1=1, index_n2=1.5) ->
+    Fresnel: _.memoize ((incident_angle, incident_angle_n1=60, index_n1=1, index_n2=1.5) ->
       W = {}
 
       brewster = W.brewster = math.unit math.atan(index_n2 / index_n1), "rad"
@@ -100,7 +100,7 @@ define ["math", "underscore"], (math, _)->
 
       rtotal = W.rtotal = math.mean rs, rp
 
-      W
+      W), (args...) -> args.join "\t"
 
     Density: (elevation) ->
       W = E: elevation
