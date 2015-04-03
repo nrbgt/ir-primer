@@ -67,7 +67,7 @@
   fill: none;
 }
 .explanation svg .plots .wien path {
-  stroke-width: 6px !important;
+  stroke-width: 3px !important;
   stroke: #900;
 }
 .explanation svg .plots .scanline path {

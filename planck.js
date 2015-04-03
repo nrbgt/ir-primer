@@ -30,7 +30,7 @@
       r: 5,
       cx: 0
     };
-    sidebarWidth = 180;
+    sidebarWidth = 80;
     wavelengths = ((function() {
       var _i, _results;
       _results = [];
@@ -53,7 +53,7 @@
       }
       return _results;
     })());
-    temperatures = [100, 200, 400, 600, 800, 1000, 2000, 3000, 4000, 5000, 6000];
+    temperatures = [100, 250, 500, 1000, 2500, 5000];
     wiens = temperatures.map(function(temperature) {
       return wiensLaw(temperature);
     });
@@ -107,7 +107,7 @@
         y: d3.svg.axis().scale(scales.y).orient('left')
       };
       api = function(selection) {
-        var clip, defs, el_xAxis, el_yAxis, handleLabel, handleSolution, plots, plotsBg, slide, slideHandle, slider, sliderFormula, sliderLabel, sliderReferences, solutions, spectrum, svg, wavelengthLabel, wienSeries, xLabel, yLabel;
+        var clip, defs, el_xAxis, el_yAxis, handleLabel, handleSolution, irBand, plots, plotsBg, slide, slideHandle, slider, sliderFormula, sliderLabel, sliderReferences, solutions, spectrum, svg, wienSeries, xLabel, yLabel;
         selection.classed({
           planck: true,
           explanation: true
@@ -115,7 +115,7 @@
         slide = d3.behavior.drag().on("drag", function(value) {
           var val;
           val = parseInt(scales.slider.invert(d3.event.y));
-          TEMPERATURE = Math.max(temperatures[0], Math.min(val, temperatures.slice(-1)[0]));
+          TEMPERATURE = val;
           return api.update();
         });
         api.explore = function() {
@@ -127,36 +127,22 @@
           return api.update();
         };
         api.update = function() {
-          var series, solution, solutionObj, wavelengthSolutions;
+          var labels, series, solution, solutionObj, wavelengthSolutions;
           series = makeSeries(TEMPERATURE);
           solution = HOVERWIEN ? wiensLaw(TEMPERATURE) : plancksLaw(TEMPERATURE, WAVELENGTH);
           slideHandle.attr({
             transform: "translate(0, " + (scales.slider(TEMPERATURE)) + ")"
           });
-          handleLabel.text(TEMPERATURE);
-          handleSolution.text(solution[1] ? "I: " + (expwn(solution[1])) : "");
           plots.selectAll('.series.interactive').data([series]).call(plotSeries).classed({
             interactive: true
           }).select("path").style({
             color: "black"
           });
-          wavelengthLabel.attr({
-            transform: "translate(" + (scales.x(WAVELENGTH)) + ", 20)"
-          }).select("text").text("λ: " + (WAVELENGTH.toFixed(2)));
           sliderFormula.select(".wavelength").classed({
             variable: false
           }).text(WAVELENGTH.toFixed(2));
-          solutions.selectAll('.solution.interactive').data([solution.solution]).call(function(solution) {
-            return solution.enter().append("g").classed({
-              solution: true,
-              interactive: true
-            }).append("circle").attr({
-              r: 3
-            });
-          }).attr({
-            transform: function(d) {
-              return "translate(" + (scales.x(solution[0])) + ", " + (scales.y(solution[1])) + " )";
-            }
+          plots.selectAll(".scanline path").data([[[scales.x(WAVELENGTH), scales.y.range()[0]], [scales.x(WAVELENGTH), scales.y.range()[1]]]]).attr({
+            d: d3.svg.line()
           });
           wavelengthSolutions = references.map(function(d) {
             return {
@@ -171,26 +157,36 @@
           sliderReferences.selectAll("text.solution").text(function(d) {
             return "" + (expwn(solutionObj[d.temperature]));
           });
-          solutions.selectAll(".solution.reference").data(wavelengthSolutions).call(function(solution) {
-            return solution.enter().append("g").classed({
+          labels = ["Wavelength", "Temperature", "Spectral Exitance", "Max Spectral Exitance"];
+          solutions.selectAll(".solution.legend").data([WAVELENGTH.toFixed(2), TEMPERATURE.toFixed(2), expwn(solution[1]), expwn(wiensLaw(TEMPERATURE)[1])]).call(function(solution) {
+            solution.enter().append("g").classed({
               solution: true,
-              reference: true
+              legend: true
             }).call(function(solution) {
-              return solution.append("circle").attr({
-                r: 5
-              }).style({
-                stroke: function(d) {
-                  return temperatureColor(d.series);
-                },
-                fill: function(d) {
-                  return temperatureColor(d.series);
-                }
+              solution.append("text").classed({
+                scale: true
+              }).attr({
+                dx: 10
               });
+              return solution.append("text").classed({
+                value: true
+              }).attr("text-anchor", "end");
             });
-          }).attr({
-            transform: function(d) {
-              return "translate(" + (scales.x(d.solution[0])) + ", " + (scales.y(d.solution[1])) + " )";
-            }
+            solution.attr({
+              transform: function(d, i) {
+                return "translate(\n" + (scales.x.range()[1] - sidebarWidth * 2.5) + "\n" + ((i + 1) * 30) + ")";
+              }
+            });
+            solution.select(".scale").text(function(d, i) {
+              return labels[i];
+            }).style({
+              fill: "black"
+            });
+            return solution.select(".value").text(function(d, i) {
+              return d;
+            }).style({
+              fill: "black"
+            });
           });
           return api;
         };
@@ -209,10 +205,30 @@
             height: HEIGHT
           });
           spectrum.attr({
-            x: scales.x(0.380),
-            y: scales.y.range()[1],
+            transform: "translate(" + (scales.x(0.380)) + " " + padding.top + ")"
+          }).select("rect").attr({
             width: (scales.x(0.750)) - (scales.x(0.380)),
             height: HEIGHT
+          });
+          spectrum.select("text").attr({
+            transform: function(d) {
+              return "translate(0 10) rotate(-90)";
+            }
+          });
+          irBand.attr({
+            transform: function(d) {
+              return "translate(" + (scales.x(d.band[0])) + " " + padding.top + ")";
+            }
+          }).select("rect").attr({
+            height: HEIGHT,
+            width: function(d) {
+              return scales.x(d.band[1]) - scales.x(d.band[0]);
+            }
+          });
+          irBand.select("text").attr({
+            transform: function(d) {
+              return "translate(0 10) rotate(-90)";
+            }
           });
           clip.attr({
             width: scales.x.range().slice(-1),
@@ -275,11 +291,21 @@
           }).attr({
             "clip-path": "url(#planckPath)"
           }).call(function(plots) {
-            plots.append("rect").classed({
+            plots.append("g").classed({
               spectrum: true
-            }).style({
-              fill: "url(#spectrumGradient)"
+            }).call(function(spectrum) {
+              spectrum.append("rect").style({
+                fill: "url(#spectrumGradient)"
+              });
+              return spectrum.append("text").text("Visible Light").attr({
+                dy: "1em",
+                "text-anchor": "end"
+              });
             });
+            plots.append("g").classed({
+              scanline: true
+            }).append("path");
+            plots.call(Exp.drawIrBands);
             plots.append("rect").classed({
               bg: true
             }).on({
@@ -324,7 +350,7 @@
               variable: true
             }).text(" I(λ,T)");
           });
-          svg.append("g").classed({
+          return svg.append("g").classed({
             label: true,
             x: true
           }).append("text").attr({
@@ -340,12 +366,6 @@
               variable: true
             }).text(" λ");
           });
-          return svg.append("g").classed({
-            wavelength: true,
-            interactive: true
-          }).attr({
-            "text-anchor": "middle"
-          }).append("text");
         });
         plots = svg.select(".plots");
         solutions = plots.select(".solutions");
@@ -356,27 +376,12 @@
         el_yAxis = svg.select(".axis.y");
         yLabel = svg.select(".label.y text");
         xLabel = svg.select(".label.x text");
-        wavelengthLabel = svg.select(".wavelength.interactive");
         wienSeries = plots.select(".wien");
         spectrum = svg.select(".spectrum");
+        irBand = svg.selectAll(".ir-band");
         slider = svg.selectAll(".slider").data([1]).call(function(slider) {
           slider = slider.enter().append("g").classed({
             slider: true
-          });
-          slider.append("text").classed({
-            formula: true,
-            label: true
-          }).call(function(sliderFormula) {
-            sliderFormula.append("tspan").classed({
-              variable: true
-            }).text("I(");
-            sliderFormula.append("tspan").classed({
-              variable: true,
-              wavelength: true
-            }).text("λ");
-            return sliderFormula.append("tspan").classed({
-              variable: true
-            }).text(",T)");
           });
           slider.append("text").classed({
             label: true,
@@ -398,7 +403,7 @@
             reference.append("circle").attr(sliderCircle).style({
               fill: temperatureColor
             });
-            reference.append("text").classed({
+            return reference.append("text").classed({
               temperature: true
             }).text(function(d) {
               return d.temperature;
@@ -408,15 +413,6 @@
               dy: ".35em",
               "text-anchor": "end",
               x: sliderPadding.temperature
-            });
-            return reference.append("text").classed({
-              solution: true
-            }).attr({
-              x: sliderPadding.solution,
-              dy: ".35em",
-              "text-anchor": "end"
-            }).style({
-              fill: temperatureColor
             });
           });
           return slider.append("g").classed({
