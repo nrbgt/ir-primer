@@ -119,7 +119,7 @@
             return [WAVELENGTH, convert(WAVELENGTH)];
           });
           plots.selectAll(".solution.interactive").data(scaleSolutions).call(function(solutionLabel) {
-            return solutionLabel.enter().append("g").classed({
+            solutionLabel.enter().append("g").classed({
               solution: true,
               interactive: true
             }).append("line").style({
@@ -141,14 +141,18 @@
                 return "url(#end-arrow-" + (scales.color(i)) + ")";
               }
             });
-          }).attr({
-            transform: function(d, i) {
-              if (i % 2 === 0) {
-                return "translate(" + padding.left + ", " + (scales.y[i](d[1])) + ")";
-              } else {
-                return "translate(" + (scales.x.range()[1]) + ", " + (scales.y[i](d[1])) + ")";
+            return solutionLabel.attr({
+              transform: function(d, i) {
+                var y;
+                y = scales.y[i](d[1]);
+                y = Number.isNaN(y) ? 0 : y;
+                if (i % 2 === 0) {
+                  return "translate(" + padding.left + ", " + y + ")";
+                } else {
+                  return "translate(" + (scales.x.range()[1]) + ", " + y + ")";
+                }
               }
-            }
+            });
           }).select("text").text(function(d, i) {
             if (i === 3) {
               return expwn(d[1]);
