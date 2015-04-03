@@ -4,15 +4,6 @@
     <meta charset="utf-8">
     <style>@import "./wavelengths.css";
 @import "./standalone.css";
-.title.wavenumber {
-  color: #800080;
-}
-.title.energy.ev {
-  color: #f00;
-}
-.title.energy.joule {
-  color: #00f;
-}
 
     </style>
     <script type="text/x-mathjax-config">(function() {
@@ -38,29 +29,86 @@
   </head>
   <body>
     <div class="titles">
-      <div class="title wavenumber">
+      <div class="title fill-wavenumber">
         <h1>Wavenumber</h1>
-        <div class="equation"></div>
+        <div class="equation">
+          \definecolor{other}{RGB}{100,100,100}
+          \definecolor{wavenumber}{RGB}{0,150,0}
+          \definecolor{wavelength}{RGB}{0,0,0}
+          
+          \color{wavenumber}<%= W %>
+          \color{other} = \frac{1000}{\color{wavelength}<%= Mu %>}
+          
+        </div>
       </div>
-      <div class="title energy ev">
+      <div class="title fill-energy-ev">
         <h1>Energy [eV]</h1>
-        <div class="equation"></div>
+        <div class="equation">
+          \definecolor{other}{RGB}{100,100,100}
+          \definecolor{ev}{RGB}{255,0,0}
+          \definecolor{wavelength}{RGB}{0,0,0}
+          
+          \color{ev}<%= Ev %>
+          \color{other}
+          = 4.136 \times 10^{-15}
+          \times
+          <%= c %>
+          \times
+          \color{other} \frac{1e6}{\color{wavelength}<%= Mu %>}
+          
+        </div>
       </div>
-      <div class="title energy joule">
+      <div class="title fill-energy-j">
         <h1>Energy [J]</h1>
-        <div class="equation"></div>
+        <div class="equation">
+          \definecolor{other}{RGB}{100,100,100}
+          \definecolor{j}{RGB}{0,0,255}
+          \definecolor{wavelength}{RGB}{0,0,0}
+          
+          \color{j}<%= J %>
+          \color{other}
+          = 6.63 \times 10^{-34}
+          \times
+          <%= c %>
+          \times
+          \color{other} \frac{1e6}{\color{wavelength}<%= Mu %>}
+          
+        </div>
       </div>
-      <div class="title">
-        <h1>Frequency</h1>
-        <div class="equation"></div>
+      <div class="title fill-frequency">
+        <h1>Frequency [THz]</h1>
+        <div class="equation">
+          \definecolor{other}{RGB}{100,100,100}
+          \definecolor{frequency}{RGB}{128, 0, 128}
+          \definecolor{wavelength}{RGB}{0,0,0}
+          
+          \color{frequency}<%= Fq %>
+          \color{other}
+          = <%= c %>
+          \div
+          \color{wavelength}<%= Mu %>
+          \color{other}
+          \div
+          10^6
+          
+        </div>
       </div>
     </div>
     <div class="explanation"></div>
     <script src="./bower_components/requirejs/require.js"></script>
     <script>(function() {
-  require(["./bower_components/d3/d3.js", "./wavelengths.js"], function(d3, Wavelengths) {
-    var plot, wavelengths;
+  require(["./bower_components/d3/d3.js", "./wavelengths.js", "fn.js"], function(d3, Wavelengths, Fn) {
+    var eq, fn, plot, wavelengths;
     wavelengths = Wavelengths(d3);
+    fn = Fn(d3, MathJax).replacements({
+      W: "W",
+      Ev: "E",
+      Mu: "µ",
+      J: "J",
+      Fq: "Fq",
+      c: "c"
+    });
+    eq = d3.selectAll(".equation").call(fn);
     return plot = d3.select(".explanation").call(wavelengths);
   });
 

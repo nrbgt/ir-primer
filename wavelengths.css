@@ -1,1 +1,18 @@
 @import "explanation.css";
+@import "explanation.css";
+.fill-wavenumber {
+  fill: #008000;
+  color: #008000;
+}
+.fill-energy-ev {
+  fill: #f00;
+  color: #f00;
+}
+.fill-frequency {
+  fill: #800080;
+  color: #800080;
+}
+.fill-energy-j {
+  fill: #00f;
+  color: #00f;
+}
