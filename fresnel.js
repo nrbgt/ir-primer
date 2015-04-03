@@ -82,7 +82,7 @@
         api.exploreIofR = function(d, i) {
           var mouseX, mouseY, _ref;
           _ref = d3.mouse(this), mouseX = _ref[0], mouseY = _ref[1];
-          INDEX_N[i] = scales.iofr.invert(mouseX);
+          INDEX_N[d.key - 1] = scales.iofr.invert(mouseX);
           return api.update();
         };
         api.update = function() {
@@ -168,10 +168,10 @@
           });
           iofrValues.attr({
             transform: function(d) {
-              return "translate(" + (scales.iofr(INDEX_N[d - 1])) + ", 0)";
+              return "translate(" + (scales.iofr(INDEX_N[d.key - 1])) + ", 0)";
             }
           }).select("text").text(function(d) {
-            return INDEX_N[d - 1].toFixed(2);
+            return INDEX_N[d.key - 1].toFixed(2);
           });
           plots.selectAll('.series').data(serieses).call(plotSeries);
           return api;
@@ -198,9 +198,10 @@
             }
           });
           iofrBg.attr({
+            y: -20,
             x: padding.left,
             width: scales.iofr.range()[1] - scales.iofr.range()[0],
-            height: 20
+            height: 50
           });
           clip.attr({
             width: WIDTH,
@@ -222,7 +223,7 @@
             transform: "translate(10, " + (HEIGHT / 2) + ") rotate(-90)"
           });
           iofrLabel.attr({
-            transform: "translate(" + (WIDTH / 2) + ", " + (HEIGHT - 20) + ")"
+            transform: "translate(" + (WIDTH / 4) + ", 50)"
           });
           return api.update();
         };
@@ -252,13 +253,10 @@
               fill: Object
             });
           });
-          svg.append("g").append("text").classed({
-            label: true,
-            iofrLabel: true
-          }).text("Index of Refraction").attr({
-            "text-anchor": "middle"
-          });
-          svg.selectAll(".iofr").data([1, 2]).enter().append("g").classed({
+          svg.selectAll(".iofr").data(d3.entries({
+            1: "Originating Index of Refraction",
+            2: "Incident Index of Refraction"
+          })).enter().append("g").classed({
             iofr: true
           }).on("mousemove", api.exploreIofR).call(function(iofr) {
             iofr.append("rect").classed({
@@ -266,11 +264,10 @@
             });
             iofr.append("text").classed({
               label: true
-            }).text(function(d) {
-              return "n" + d;
+            }).text(function(d, i) {
+              return "n" + d.key + ": " + d.value;
             }).attr({
-              x: padding.left - 20,
-              "text-anchor": "end"
+              "text-anchor": "middle"
             });
             iofr.append("g").classed({
               interactive: true
@@ -346,7 +343,7 @@
         solutions = plots.select(".solutions");
         plotsBg = plots.select(".bg");
         iofrBg = iofr.selectAll(".bg");
-        iofrLabel = svg.select(".iofrLabel");
+        iofrLabel = svg.selectAll(".iofr .label");
         iofrValues = iofr.selectAll(".interactive");
         defs = svg.select("defs");
         clip = defs.select(".fresnel-path rect");
