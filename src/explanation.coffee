@@ -1,4 +1,12 @@
-define ["./bower_components/mathjs/dist/math.js"], (math)->
+require.config
+  paths:
+    underscore: "./bower_components/underscore/underscore"
+    math: "./bower_components/mathjs/dist/math"
+  shim:
+    underscore: exports: "_"
+
+define ["math", "underscore"], (math, _)->
+  console.log _
   iferr = (result, fn) ->
     try
       result = fn()
@@ -56,7 +64,7 @@ define ["./bower_components/mathjs/dist/math.js"], (math)->
     EnergyJ: (wavelength) ->
       C.hjs() * C.cms() * 1e6 / wavelength
 
-    Fresnel: (incident_angle, incident_angle_n1=60, index_n1=1, index_n2=1.5) ->
+    Fresnel: _.memoize (incident_angle, incident_angle_n1=60, index_n1=1, index_n2=1.5) ->
       W = {}
 
       brewster = W.brewster = math.unit math.atan(index_n2 / index_n1), "rad"

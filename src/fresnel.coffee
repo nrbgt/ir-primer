@@ -49,6 +49,9 @@ define ["./explanation.js"], (Exp)->
           .data (d)-> [d.points]
           .attr d: seriesPath
 
+    colorizeLegend = (d, i) ->
+      if i then scales.color i - 1 else "black"
+
     api = (selection) ->
       selection.classed
         fresnel: true
@@ -90,22 +93,55 @@ define ["./explanation.js"], (Exp)->
             scaleSolution[part]
           ]
 
-        solutions.selectAll ".solution.reference"
-          .data scaleSolutions
+        plots.selectAll ".scanline path"
+          .data [
+            [
+              [scales.x(INCIDENT_ANGLE), scales.y.range()[0]]
+              [scales.x(INCIDENT_ANGLE), scales.y.range()[1]]
+            ]
+          ]
+          .attr
+            d: d3.svg.line()
+
+        labels = [
+          "Incident Angle"
+          "Reflection (Perpendicular)"
+          "Reflection (Parallel)"
+          "Reflection (Average)"
+        ]
+
+        solutions
+          .selectAll ".solution.legend"
+          .data [[INCIDENT_ANGLE, INCIDENT_ANGLE]].concat scaleSolutions
           .call (solution) ->
             solution.enter()
               .append "g"
-              .classed solution: true, reference: true
+              .classed solution: true, legend: true
               .call (solution) ->
-                solution.append "circle"
-                  .attr r: 5
-                  .style stroke: (d, i) -> scales.color i
-          .attr transform: (d, i) ->
-            "translate(#{scales.x d[0]}, #{scales.y d[1]} )"
+                solution.append "text"
+                  .classed scale: true
+                  .attr dx: 10
+                solution.append "text"
+                  .classed value: true
+                  .attr "text-anchor", "end"
+
+            solution
+              .attr
+                transform: (d, i) -> """
+                translate(
+                  #{1.5 * padding.left} #{padding.top + ((i + 1) * 30)}
+                )"""
+
+            solution.select ".scale"
+              .text (d, i) -> labels[i]
+              .style fill: colorizeLegend
+
+            solution.select ".value"
+              .text (d, i) -> d[1].toFixed 2
+              .style fill: colorizeLegend
 
         solutions.selectAll ".solution.interactive"
           .data [
-            [INCIDENT_ANGLE, INCIDENT_ANGLE]
             [INCIDENT_ANGLE, scaleSolutions[0][1]]
             [INCIDENT_ANGLE, scaleSolutions[1][1]]
             [INCIDENT_ANGLE, scaleSolutions[2][1]]
@@ -114,24 +150,17 @@ define ["./explanation.js"], (Exp)->
             solutionLabel.enter()
               .append "g"
               .classed solution: true, interactive: true
-              .append "text"
+              .append "line"
               .style
-                fill: (d, i) -> ["black", "red", "blue", "green"][i]
+                stroke: (d, i) -> scales.color i
               .attr
-                "text-anchor": (d, i) ->
-                  if i == 0
-                    "middle"
-                  else
-                    "end"
+                x1: 0
+                y1: 0
+                x2: 20
+                y2: 0
+                "marker-start": (d, i) -> "url(#end-arrow-#{scales.color i})"
           .attr
-            transform: (d, i) ->
-              if i == 0
-                "translate(#{scales.x d[0]}, #{ padding.top + 20})"
-              else
-                "translate(#{padding.left + 5}, #{scales.y d[1]})"
-          .select "text"
-            .text (d, i)->
-              "#{ ['Angle', 'Rs', 'Rp', 'Rtotal'][i] } = #{d[1].toFixed 2}"
+            transform: (d, i) -> "translate(#{padding.left}, #{scales.y d[1]})"
 
         iofrValues
           .attr
@@ -205,10 +234,26 @@ define ["./explanation.js"], (Exp)->
             .classed plot: true
 
           svg.append "defs"
-            .append "clipPath"
-              .classed "fresnel-path": true
-              .attr id: "fresnelPath"
-              .append "rect"
+            .call (defs) ->
+              defs.append "clipPath"
+                .classed "fresnel-path": true
+                .attr id: "fresnelPath"
+                .append "rect"
+
+              defs.selectAll "marker.arrow"
+                .data scales.color.range()
+                .enter()
+                .append "marker"
+                .classed arrow: true
+                .attr
+                  id: (d) -> "end-arrow-#{d}"
+                  viewBox: "0 -5 10 10"
+                  markerWidth: 6
+                  markerHeight: 6
+                  orient: "auto"
+                .append "path"
+                .attr d: "M 10,-5 L 0,0 L 10,5"
+                .style fill: Object
 
           svg.append "g"
             .append "text"
@@ -249,6 +294,10 @@ define ["./explanation.js"], (Exp)->
 
               plots.append "g"
                 .classed solutions: true
+
+              plots.append "g"
+                .classed scanline: true
+                .append "path"
 
           svg.append "g"
             .classed axis: true, x: true
