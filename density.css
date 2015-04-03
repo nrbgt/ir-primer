@@ -1,81 +1,17 @@
-.explanation {
-  overflow: hidden;
-  font-family: MathJax_Main;
+@import "explanation.css";
+.fill-altitude {
+  fill: #000;
+  color: #000;
 }
-.explanation tspan.variable {
-  font-style: italic;
+.fill-temperature {
+  fill: #00f;
+  color: #00f;
 }
-.explanation .slider {
-  margin-top: 10px;
+.fill-relative-pressure {
+  fill: #f00;
+  color: #f00;
 }
-.explanation .slider .handle text {
-  font-weight: bold;
-}
-.explanation .slider .handle text.temperature {
-  fill: #fff;
-}
-.explanation .slider .handle circle {
-  fill: transparent;
-  stroke: #000;
-  stroke-width: 2px;
-}
-.explanation svg text {
-  font-size: 18px;
-}
-.explanation svg .label text {
-  font-size: 32px;
-}
-.explanation svg .label text .unit {
-  fill: #777;
-}
-.explanation svg .axis line,
-.explanation svg .axis path {
-  fill: none;
-  stroke: #999;
-  shape-rendering: crispEdges;
-}
-.explanation svg .axis text {
-  font-size: 16px;
-  text-anchor: middle;
-}
-.explanation svg .interactive path,
-.explanation svg .interactive circle {
-  stroke: #000 !important;
-  stroke-width: 4px;
-}
-.explanation svg .ir-band,
-.explanation svg .spectrum {
-  opacity: 0.5;
-}
-.explanation svg .ir-band rect,
-.explanation svg .spectrum rect {
-  fill: #ddd;
-}
-.explanation svg .ir-band text,
-.explanation svg .spectrum text {
-  fill: #666;
-  font-size: 1.5em;
-}
-.explanation svg .spectrum text {
-  fill: #fff;
-}
-.explanation svg .plots path {
-  fill: none;
-  stroke-width: 2px;
-}
-.explanation svg .plots .bg {
-  fill: transparent;
-}
-.explanation svg .plots .solution {
-  fill: none;
-}
-.explanation svg .plots .wien path {
-  stroke-width: 3px !important;
-  stroke: #900;
-}
-.explanation svg .plots .scanline path {
-  stroke: #999;
-}
-.explanation svg .plots .solutions .legend text {
-  fill: #333;
+.fill-relative-density {
+  fill: #008000;
+  color: #008000;
 }
