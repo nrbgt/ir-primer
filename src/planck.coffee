@@ -28,7 +28,7 @@ define ["./explanation.js"], (Exp)->
   yDomain = [1e-4, 1e9]
   axisW = 20
   sliderCircle = r: 5, cx: 0
-  sidebarWidth = 180
+  sidebarWidth = 80
 
   # data
   wavelengths = (i for i in [0.1..1.99] by 0.01)
@@ -36,8 +36,7 @@ define ["./explanation.js"], (Exp)->
      .concat (i for i in [20..100] by 1)
 
   temperatures = [
-    100, 200, 400, 600, 800, 1000,
-    2000, 3000, 4000, 5000, 6000
+    100, 250, 500, 1000, 2500, 5000
   ]
 
   wiens = temperatures.map (temperature) -> wiensLaw temperature
@@ -106,8 +105,7 @@ define ["./explanation.js"], (Exp)->
       slide = d3.behavior.drag()
         .on "drag", (value) ->
           val = parseInt scales.slider.invert d3.event.y
-          TEMPERATURE = Math.max temperatures[0],
-            Math.min(val, temperatures.slice(-1)[0])
+          TEMPERATURE = val
           api.update()
 
       api.explore = ->
@@ -127,9 +125,8 @@ define ["./explanation.js"], (Exp)->
           else
             plancksLaw TEMPERATURE, WAVELENGTH
 
-        slideHandle.attr transform: "translate(0, #{ scales.slider TEMPERATURE })"
-        handleLabel.text TEMPERATURE
-        handleSolution.text if solution[1] then "I: #{expwn solution[1]}" else ""
+        slideHandle.attr
+          transform: "translate(0, #{ scales.slider TEMPERATURE })"
         plots.selectAll '.series.interactive'
           .data [series]
           .call plotSeries
@@ -137,24 +134,20 @@ define ["./explanation.js"], (Exp)->
           .select "path"
             .style color: "black"
 
-        wavelengthLabel.attr transform: "translate(#{ scales.x WAVELENGTH }, 20)"
-          .select "text"
-          .text "λ: #{ WAVELENGTH.toFixed(2) }"
-
         sliderFormula.select ".wavelength"
           .classed variable: false
           .text WAVELENGTH.toFixed(2)
 
-        solutions.selectAll '.solution.interactive'
-          .data [solution.solution]
-          .call (solution) ->
-            solution.enter()
-              .append "g"
-              .classed solution: true, interactive: true
-              .append "circle"
-              .attr r: 3
-          .attr transform: (d) ->
-            "translate(#{scales.x solution[0]}, #{scales.y solution[1]} )"
+
+        plots.selectAll ".scanline path"
+          .data [
+            [
+              [scales.x(WAVELENGTH), scales.y.range()[0]]
+              [scales.x(WAVELENGTH), scales.y.range()[1]]
+            ]
+          ]
+          .attr
+            d: d3.svg.line()
 
         wavelengthSolutions = references.map (d) ->
           series: d
@@ -173,20 +166,46 @@ define ["./explanation.js"], (Exp)->
         sliderReferences.selectAll "text.solution"
           .text (d) -> "#{ expwn solutionObj[d.temperature] }"
 
-        solutions.selectAll ".solution.reference"
-          .data wavelengthSolutions
+        labels = [
+          "Wavelength", "Temperature", "Spectral Exitance",
+          "Max Spectral Exitance"
+        ]
+
+        solutions
+          .selectAll ".solution.legend"
+          .data [
+            WAVELENGTH.toFixed 2
+            TEMPERATURE.toFixed 2
+            expwn solution[1]
+            expwn wiensLaw(TEMPERATURE)[1]
+          ]
           .call (solution) ->
             solution.enter()
               .append "g"
-              .classed solution: true, reference: true
+              .classed solution: true, legend: true
               .call (solution) ->
-                solution.append "circle"
-                  .attr r: 5
-                  .style
-                    stroke: (d) -> temperatureColor d.series
-                    fill: (d) -> temperatureColor d.series
-          .attr transform: (d) ->
-            "translate(#{scales.x d.solution[0]}, #{scales.y d.solution[1]} )"
+                solution.append "text"
+                  .classed scale: true
+                  .attr dx: 10
+                solution.append "text"
+                  .classed value: true
+                  .attr "text-anchor", "end"
+
+            solution
+              .attr
+                transform: (d, i) ->
+                  """translate(
+                    #{scales.x.range()[1] - sidebarWidth * 2.5}
+                    #{(i+1) * 30})
+                  """
+
+            solution.select ".scale"
+              .text (d, i) -> labels[i]
+              .style fill: "black"
+
+            solution.select ".value"
+              .text (d, i) -> d
+              .style fill: "black"
 
         # for chaining
         api
@@ -203,11 +222,32 @@ define ["./explanation.js"], (Exp)->
 
         plotsBg.attr width: WIDTH - padding.right - sidebarWidth, height: HEIGHT
 
-        spectrum.attr
-          x: scales.x 0.380
-          y: scales.y.range()[1]
-          width: (scales.x 0.750) - (scales.x 0.380)
-          height: HEIGHT
+        spectrum
+          .attr
+            transform: "translate(#{scales.x 0.380} #{padding.top})"
+        .select "rect"
+          .attr
+            width: (scales.x 0.750) - (scales.x 0.380)
+            height: HEIGHT
+
+        spectrum.select "text"
+          .attr
+            transform: (d) ->
+              "translate(0 10) rotate(-90)"
+
+        irBand
+          .attr
+            transform: (d) ->
+              "translate(#{ scales.x(d.band[0])} #{padding.top})"
+          .select "rect"
+            .attr
+              height: HEIGHT
+              width: (d) -> scales.x(d.band[1]) - scales.x(d.band[0])
+        irBand
+          .select "text"
+          .attr
+            transform: (d) ->
+              "translate(0 10) rotate(-90)"
 
         clip.attr
           width: scales.x.range().slice(-1),
@@ -271,9 +311,22 @@ define ["./explanation.js"], (Exp)->
             .classed plots: true
             .attr "clip-path": "url(#planckPath)"
             .call (plots) ->
-              plots.append "rect"
+              plots.append "g"
                 .classed spectrum: true
-                .style fill: "url(#spectrumGradient)"
+                .call (spectrum) ->
+                  spectrum.append "rect"
+                    .style fill: "url(#spectrumGradient)"
+                  spectrum.append "text"
+                    .text "Visible Light"
+                    .attr
+                      dy: "1em"
+                      "text-anchor": "end"
+
+              plots.append "g"
+                .classed scanline: true
+                .append "path"
+
+              plots.call Exp.drawIrBands
 
               plots.append "rect"
                 .classed bg: true
@@ -332,12 +385,6 @@ define ["./explanation.js"], (Exp)->
                 .classed variable: true
                 .text " λ"
 
-
-          svg.append "g"
-            .classed wavelength: true, interactive: true
-            .attr "text-anchor": "middle"
-            .append "text"
-
       # harvest selectors just initialized
       plots = svg.select ".plots"
       solutions = plots.select ".solutions"
@@ -348,9 +395,9 @@ define ["./explanation.js"], (Exp)->
       el_yAxis = svg.select ".axis.y"
       yLabel = svg.select ".label.y text"
       xLabel = svg.select ".label.x text"
-      wavelengthLabel = svg.select ".wavelength.interactive"
       wienSeries = plots.select ".wien"
       spectrum = svg.select ".spectrum"
+      irBand = svg.selectAll ".ir-band"
 
 
       slider = svg.selectAll ".slider"
@@ -360,20 +407,6 @@ define ["./explanation.js"], (Exp)->
             .append "g"
             .classed slider: true
 
-          slider.append "text"
-            .classed
-              formula: true
-              label: true
-            .call (sliderFormula) ->
-              sliderFormula.append "tspan"
-                .classed variable: true
-                .text "I("
-              sliderFormula.append "tspan"
-                .classed variable: true, wavelength: true
-                .text "λ"
-              sliderFormula.append "tspan"
-                .classed variable: true
-                .text ",T)"
 
           slider.append "text"
             .classed
@@ -409,11 +442,6 @@ define ["./explanation.js"], (Exp)->
                   dy: ".35em"
                   "text-anchor": "end"
                   x: sliderPadding.temperature
-
-              reference.append "text"
-                .classed solution: true
-                .attr x: sliderPadding.solution, dy: ".35em", "text-anchor": "end"
-                .style fill: temperatureColor
 
           slider.append "g"
             .classed handle: true
