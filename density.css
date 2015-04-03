@@ -19,10 +19,13 @@
   stroke: #000;
   stroke-width: 2px;
 }
-.explanation svg .label {
+.explanation svg text {
+  font-size: 18px;
+}
+.explanation svg .label text {
   font-size: 32px;
 }
-.explanation svg .label .unit {
+.explanation svg .label text .unit {
   fill: #777;
 }
 .explanation svg .axis line,
