@@ -135,8 +135,6 @@
           });
           plots.selectAll('.series.interactive').data([series]).call(plotSeries).classed({
             interactive: true
-          }).select("path").style({
-            color: "black"
           });
           sliderFormula.select(".wavelength").classed({
             variable: false
